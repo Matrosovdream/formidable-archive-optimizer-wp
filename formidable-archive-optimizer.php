@@ -70,37 +70,9 @@ function ffao_archive_old_entries() {
 }
 
 // Hook into Formidable to retrieve archived entries
-add_filter('frm_get_entry', function ($entry, $entry_id) {
-    if ($entry) return $entry;
-
-    global $wpdb;
-    $items_archive = "{$wpdb->prefix}frm_items_archive";
-    $metas_archive = "{$wpdb->prefix}frm_item_metas_archive";
-
-    $item = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM $items_archive WHERE id = %d",
-        $entry_id
-    ));
-
-    if (!$item) return $entry;
-
-    $metas = $wpdb->get_results($wpdb->prepare(
-        "SELECT meta_key, meta_value FROM $metas_archive WHERE item_id = %d",
-        $entry_id
-    ));
-
-    $entry = [
-        'id' => $item->id,
-        'form_id' => $item->form_id,
-        'user_id' => $item->user_id,
-        'created_at' => $item->created_at,
-        'updated_at' => $item->updated_at,
-        'metas' => [],
-    ];
-
-    foreach ($metas as $meta) {
-        $entry['metas'][$meta->meta_key] = maybe_unserialize($meta->meta_value);
-    }
-
-    return $entry;
-}, 10, 2);
+/*
+echo "<pre>";
+print_r($entry);
+echo "</pre>";
+die();
+*/
