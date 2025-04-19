@@ -6,6 +6,24 @@
  * Author: Your Name
  */
 
+
+add_action('init', 'frm_work');
+function frm_work() {
+
+    if( isset( $_GET['create_tables'] ) ) {
+
+        ffao_create_archive_tables();
+        die();
+
+    }
+
+    if( isset( $_GET['migrate'] ) ) {
+        ffao_archive_old_entries();
+        die();
+    }
+
+}
+
 register_activation_hook(__FILE__, 'ffao_create_archive_tables');
 
 function ffao_create_archive_tables() {
