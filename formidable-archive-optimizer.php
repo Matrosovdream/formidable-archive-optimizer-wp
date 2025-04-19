@@ -70,9 +70,9 @@ function ffao_archive_old_entries() {
 }
 
 // Hook into Formidable to retrieve archived entries
+
 /*
-echo "<pre>";
-print_r($entry);
-echo "</pre>";
-die();
+DROP TABLE wp_frm_items_archive;
+DROP TABLE wp_frm_item_metas_archive;
+DROP TABLE wp_frm_payments_archive;
 */
