@@ -29,6 +29,11 @@ function frm_work() {
         die();
     }
 
+    if( isset( $_GET['restore'] ) ) {
+        ffao_restore_all_archived_entries();
+        die();
+    }
+
 }
 
 register_activation_hook(__FILE__, 'ffao_create_archive_tables');
@@ -93,6 +98,26 @@ function ffao_archive_old_entries() {
 
     return count($old_ids);
 }
+
+function ffao_restore_all_archived_entries() {
+    global $wpdb;
+
+    $items_table       = "{$wpdb->prefix}frm_items";
+    $metas_table       = "{$wpdb->prefix}frm_item_metas";
+    $items_archive     = "{$wpdb->prefix}frm_items_archive";
+    $metas_archive     = "{$wpdb->prefix}frm_item_metas_archive";
+
+    // Insert back to original tables
+    $wpdb->query("INSERT IGNORE INTO $items_table SELECT * FROM $items_archive");
+    $wpdb->query("INSERT IGNORE INTO $metas_table SELECT * FROM $metas_archive");
+
+    // Now delete from archive
+    $wpdb->query("DELETE FROM $metas_archive");
+    $wpdb->query("DELETE FROM $items_archive");
+
+    return true;
+}
+
 
 
 // Hook into Formidable to retrieve archived entries
