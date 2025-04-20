@@ -17,11 +17,11 @@ class Frm_entry_replacer {
     public function addHooks() {
 
         // Replace entry data from archive if the original on is empty
-        add_filter('frm_get_entry', array($this, 'ffao_get_entry_with_archive'), 10, 2);
+        add_filter('frm_get_entry', array($this, 'getEntryArchive'), 10, 2);
 
     }
 
-    public function ffao_get_entry_with_archive($entry=null, $entry_id=null) {
+    public function getEntryArchive($entry=null, $entry_id=null) {
 
         if( $entry ) { return $entry; }
     
