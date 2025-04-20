@@ -27,7 +27,7 @@ class Frm_optimizer_settings {
             'frm_items_default' => "{$this->prefix}frm_items",
             'frm_item_metas_default' => "{$this->prefix}frm_item_metas",
             'frm_items_archive' => "{$this->prefix}frm_items_archive",
-            'frm_item_metas_archive' => "{$this->prefix}frm_item_archive",
+            'frm_item_metas_archive' => "{$this->prefix}frm_item_metas_archive",
         ];
 
     }

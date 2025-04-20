@@ -12,6 +12,7 @@ define('FRM_OPT_URL', __DIR__);
 // Include classes
 require_once FRM_OPT_URL.'/classes/frm-optimizer-settings.php';
 require_once FRM_OPT_URL.'/classes/frm-entry-replacer.php';
+require_once FRM_OPT_URL.'/classes/frm-optimizer-admin.php';
 
 
 add_action('init', 'frm_work');
@@ -46,30 +47,6 @@ function ffao_create_archive_tables() {
     $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}frm_item_metas_archive LIKE {$wpdb->prefix}frm_item_metas;");
 }
 
-add_action('admin_menu', function () {
-    add_submenu_page(
-        'tools.php',
-        'Formidable Optimizer',
-        'Formidable Optimizer',
-        'manage_options',
-        'ffao-optimize',
-        'ffao_render_page'
-    );
-});
-
-function ffao_render_page() {
-    if (isset($_POST['ffao_run']) && check_admin_referer('ffao_optimize')) {
-        $count = ffao_archive_old_entries();
-        echo "<div class='notice notice-success'><p>Moved $count entries to archive.</p></div>";
-    }
-
-    echo '<div class="wrap"><h1>Formidable Archive Optimizer</h1>';
-    echo '<form method="POST">';
-    wp_nonce_field('ffao_optimize');
-    echo '<p>This will move entries older than 6 months to archive.</p>';
-    echo '<button class="button button-primary" type="submit" name="ffao_run">Optimize Now</button>';
-    echo '</form></div>';
-}
 
 function ffao_archive_old_entries() {
     global $wpdb;
@@ -117,6 +94,10 @@ function ffao_restore_all_archived_entries() {
 
     return true;
 }
+
+
+
+
 
 
 
