@@ -12,6 +12,7 @@ define('FRM_OPT_ASSETS', plugins_url('formidable-optimizer-wp/assets/'));
 
 // Include classes
 require_once FRM_OPT_URL.'/classes/frm-optimizer-settings.php';
+require_once FRM_OPT_URL.'/classes/frm-entry-helper.php';
 require_once FRM_OPT_URL.'/classes/frm-entry-replacer.php';
 require_once FRM_OPT_URL.'/classes/frm-optimizer-admin.php';
 

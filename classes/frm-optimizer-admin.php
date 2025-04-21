@@ -2,7 +2,12 @@
 
 class Frm_optimizer_admin {
 
+    private $helper;
+
     public function __construct() {
+
+        $this->helper = new Frm_optimize_helper();
+
         $this->addHooks();
     }
 
@@ -74,13 +79,11 @@ class Frm_optimizer_admin {
     }
 
     private function get_total_entries() {
-        global $wpdb;
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}frm_items WHERE status != 'draft'");
+        return $this->helper->getEntryCount()['default'] ?? 0;
     }
 
     private function get_archived_entries() {
-        global $wpdb;
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}frm_items WHERE status = 'draft'");
+        return $this->helper->getEntryCount()['archive'] ?? 0;
     }
 
     public function ajax_archive_entries() {
