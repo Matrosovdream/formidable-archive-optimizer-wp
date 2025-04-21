@@ -1,0 +1,26 @@
+.fo-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    max-width: 600px;
+}
+
+.fo-msg {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.fo-msg .spinner {
+    float: none;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.success-msg {
+    color: green;
+}
+
+.error-msg {
+    color: red;
+}

@@ -8,6 +8,7 @@
 
 // Variables
 define('FRM_OPT_URL', __DIR__);
+define('FRM_OPT_ASSETS', plugins_url('formidable-optimizer-wp/assets/'));
 
 // Include classes
 require_once FRM_OPT_URL.'/classes/frm-optimizer-settings.php';

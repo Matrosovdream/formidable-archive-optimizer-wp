@@ -1,69 +1,101 @@
-<?php 
+<?php
 
 class Frm_optimizer_admin {
 
-
-    public function __construct()
-    {
-
-        // Include filters/hooks
+    public function __construct() {
         $this->addHooks();
-
     }
 
-    public function addHooks()
-    {
-
-        // Menu point
+    public function addHooks() {
         add_action('admin_menu', array($this, 'frm_register_optimizer_page'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
 
+        add_action('wp_ajax_frm_archive_entries', array($this, 'ajax_archive_entries'));
+        add_action('wp_ajax_frm_restore_entries', array($this, 'ajax_restore_entries'));
     }
 
     public function frm_register_optimizer_page() {
         add_submenu_page(
-            'formidable',                 // Parent slug (Formidable plugin menu)
-            'Optimizer',                  // Page title
-            'Optimizer',                  // Menu title
-            'manage_options',             // Capability
-            'formidable-optimizer',      // Menu slug
-            array($this, 'frm_display_optimizer_page')  // Callback
+            'formidable',
+            'Optimizer',
+            'Optimizer',
+            'manage_options',
+            'formidable-optimizer',
+            array($this, 'frm_display_optimizer_page')
+        );
+    }
+
+    public function enqueue_assets($hook) {
+        if (strpos($hook, 'formidable-optimizer') === false) {
+            return;
+        }
+
+        wp_enqueue_script(
+            'frm-optimizer-js',
+            FRM_OPT_ASSETS.'frm-optimizer.js',
+            array('jquery'),
+            null,
+            true
+        );
+
+        wp_localize_script('frm-optimizer-js', 'frm_optimizer', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('frm_optimizer_nonce')
+        ));
+
+        wp_enqueue_style(
+            'frm-optimizer-css', 
+            FRM_OPT_ASSETS.'frm-optimizer.css'
         );
     }
 
     public function frm_display_optimizer_page() {
+        $total_entries = $this->get_total_entries();
+        $archived_entries = $this->get_archived_entries();
         ?>
         <div class="wrap">
             <h1>Formidable Optimizer</h1>
-            <form method="post">
-                <?php wp_nonce_field('frm_optimizer_action', 'frm_optimizer_nonce'); ?>
-                <p>
-                    <input type="submit" name="frm_archive_entries" class="button button-primary" value="Archive Entries" />
-                    <input type="submit" name="frm_restore_entries" class="button button-secondary" value="Restore Entries" />
-                </p>
-            </form>
-            <?php call_user_func(array($this, 'frm_handle_optimizer_actions')); ?>
+
+            <div class="fo-section">
+                <h2>Archive Entries</h2>
+                <p>Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong></p>
+                <button id="fo-archive-btn" class="button button-primary">Archive Entries</button>
+                <div id="fo-archive-msg" class="fo-msg"></div>
+            </div>
+
+            <div class="fo-section">
+                <h2>Restore Entries</h2>
+                <p>Archived Entries: <strong id="fo-archived"><?php echo $archived_entries; ?></strong></p>
+                <button id="fo-restore-btn" class="button button-secondary">Restore Entries</button>
+                <div id="fo-restore-msg" class="fo-msg"></div>
+            </div>
         </div>
         <?php
     }
 
-    public function frm_handle_optimizer_actions() {
-        if (!isset($_POST['frm_optimizer_nonce']) || !wp_verify_nonce($_POST['frm_optimizer_nonce'], 'frm_optimizer_action')) {
-            return;
-        }
-
-        if (isset($_POST['frm_archive_entries'])) {
-            // Archive logic here (example message)
-            echo '<div class="notice notice-success"><p>Entries have been archived.</p></div>';
-            // Implement your logic here to move old Formidable entries to another table
-        }
-
-        if (isset($_POST['frm_restore_entries'])) {
-            // Restore logic here (example message)
-            echo '<div class="notice notice-success"><p>Entries have been restored.</p></div>';
-            // Implement your logic here to bring them back from archive
-        }
+    private function get_total_entries() {
+        global $wpdb;
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}frm_items WHERE status != 'draft'");
     }
 
+    private function get_archived_entries() {
+        global $wpdb;
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}frm_items WHERE status = 'draft'");
+    }
+
+    public function ajax_archive_entries() {
+        check_ajax_referer('frm_optimizer_nonce', 'nonce');
+
+        // TODO: real logic to archive entries
+        wp_send_json_success(['message' => 'Entries have been archived.']);
+    }
+
+    public function ajax_restore_entries() {
+        check_ajax_referer('frm_optimizer_nonce', 'nonce');
+
+        // TODO: real logic to restore entries
+        wp_send_json_success(['message' => 'Entries have been restored.']);
+    }
 }
 
 new Frm_optimizer_admin();
