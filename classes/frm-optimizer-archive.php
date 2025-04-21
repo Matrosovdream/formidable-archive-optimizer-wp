@@ -2,13 +2,25 @@
 
 class Frm_optimizer_archive {
 
+    private $settings;
+    private $tables;
+
+    public function __construct()
+    {
+
+        // Prepare settings
+        $settings = (new Frm_optimizer_settings())->getSettings();
+        $this->tables = $settings['tables'];
+
+    }
+
     public function createArchiveTables() {
 
         global $wpdb;
     
         // Archive tables creation
-        $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}frm_items_archive LIKE {$wpdb->prefix}frm_items;");
-        $wpdb->query("CREATE TABLE IF NOT EXISTS {$wpdb->prefix}frm_item_metas_archive LIKE {$wpdb->prefix}frm_item_metas;");
+        $wpdb->query("CREATE TABLE IF NOT EXISTS {$this->tables['frm_items_archive']} LIKE {$this->tables['frm_items_default']};");
+        $wpdb->query("CREATE TABLE IF NOT EXISTS {$this->tables['frm_item_metas_archive']} LIKE {$this->tables['frm_item_metas_default']};");
 
     }
     
@@ -16,10 +28,10 @@ class Frm_optimizer_archive {
     public function archiveEntries() {
 
         global $wpdb;
-        $items_table = "{$wpdb->prefix}frm_items";
-        $metas_table = "{$wpdb->prefix}frm_item_metas";
-        $items_archive = "{$wpdb->prefix}frm_items_archive";
-        $metas_archive = "{$wpdb->prefix}frm_item_metas_archive";
+        $items_table = $this->tables['frm_items_default'];
+        $metas_table = $this->tables['frm_item_metas_default'];
+        $items_archive = $this->tables['frm_items_archive'];
+        $metas_archive = $this->tables['frm_item_metas_archive'];
     
         // Get old item IDs
         $old_ids = $wpdb->get_col("
@@ -46,11 +58,10 @@ class Frm_optimizer_archive {
     public function restoreEntries() {
 
         global $wpdb;
-    
-        $items_table       = "{$wpdb->prefix}frm_items";
-        $metas_table       = "{$wpdb->prefix}frm_item_metas";
-        $items_archive     = "{$wpdb->prefix}frm_items_archive";
-        $metas_archive     = "{$wpdb->prefix}frm_item_metas_archive";
+        $items_table = $this->tables['frm_items_default'];
+        $metas_table = $this->tables['frm_item_metas_default'];
+        $items_archive = $this->tables['frm_items_archive'];
+        $metas_archive = $this->tables['frm_item_metas_archive'];
     
         // Insert back to original tables
         $wpdb->query("INSERT IGNORE INTO $items_table SELECT * FROM $items_archive");
@@ -61,7 +72,7 @@ class Frm_optimizer_archive {
         $wpdb->query("DELETE FROM $items_archive");
     
         return true;
-        
+
     }
 
 }
