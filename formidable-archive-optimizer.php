@@ -210,6 +210,7 @@ add_shortcode('ffao_archive_browser', function () {
                             <th class="px-4 py-2"><input type="checkbox" id="select-all"></th>
                             <th class="px-4 py-2 text-left">Order #</th>
                             <th class="px-4 py-2 text-left">Form</th>
+                            <th class="px-4 py-2 text-left">Fields</th>
                             <th class="px-4 py-2 text-left">Created at</th>
                         </tr>
                     </thead>
@@ -224,7 +225,13 @@ add_shortcode('ffao_archive_browser', function () {
                                     <td class="px-4 py-2">
                                         <?php echo $forms[ $entry->form_id ]['name'] ?? ''; ?>
                                     </td>
-                                    <td class="px-4 py-2"><?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
+                                    <td class="px-4 py-2">
+                                        <?php foreach( $entry->fields as $field ) { ?>
+                                            <b><?php echo esc_html($field->name); ?>:</b> <?php echo esc_html($field->value); ?> <br>
+                                        <?php } ?>
+                                    </td>
+                                    <td class="px-4 py-2">
+                                        <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
                                     </td>
                                 </tr>
                             <?php endforeach; else: ?>
