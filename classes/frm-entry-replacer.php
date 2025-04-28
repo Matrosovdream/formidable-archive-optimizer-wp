@@ -85,15 +85,24 @@ class Frm_entry_replacer
 
     private function processEntryMeta( $metas, $entry ) {
 
+        /*
+        echo "<pre>";
+        print_r($metas); 
+        echo "</pre>";
+        die();
+        */
+
+        $field_ids = [];
+        
         foreach ($metas as $meta_val) {
             FrmFieldsHelper::prepare_field_value($meta_val->meta_value, $meta_val->type);
+
+            $field_ids[] = $meta_val->field_id;
 
             if ($meta_val->item_id == $entry->id) {
                 $entry->metas[$meta_val->field_id] = $meta_val->meta_value;
 
-                $entry->metas[$meta_val->field_key] = $entry->metas[$meta_val->field_id];
-
-                continue;
+                //continue;
             }
 
             // include sub entries in an array
@@ -101,12 +110,74 @@ class Frm_entry_replacer
                 $entry->metas[$meta_val->field_id] = array();
             }
 
-            $entry->metas[$meta_val->field_id][] = $meta_val->meta_value;
-
             unset($meta_val);
         }
 
+        // Extract fields info
+        $fields = $this->getFieldsInfo($field_ids);
+
+        // Go through each field and set the value
+        foreach ($fields as $field_id=>$field) {
+
+            // Set the field value
+            if (isset($entry->metas[$field->id])) {
+                $fields[$field->id]->value = $entry->metas[$field->id];
+            }
+
+        }
+        $entry->fields = $fields;
+
+        /*
+        echo "<pre>";
+        print_r($fields); 
+        echo "</pre>";
+        die();
+        */
+        
         return $entry;
+
+    }
+
+    private function getFieldsInfo($field_ids)
+    {
+
+        global $wpdb;
+
+        $fieldsRaw = $wpdb->get_results(
+            "SELECT id, name, type FROM {$wpdb->prefix}frm_fields WHERE id IN (".implode(',', $field_ids).")"  
+        );
+
+        $fields = [];
+        foreach ($fieldsRaw as $field) {
+            $fields[$field->id] = $field;
+        }
+
+        return $this->filterFields($fields);
+
+    }
+
+    private function filterFields($fields)
+    {
+
+        $filtered = [];
+        $types = ['email', 'phone'];
+        $titles = ['DOT #', 'Status'];
+
+        foreach ($fields as $field) {
+
+            // Filter by titles
+            if (in_array($field->name, $titles)) {
+                $filtered[$field->id] = $field;
+            }
+
+            // Filter by types
+            if (in_array($field->type, $types)) {
+                $filtered[$field->id] = $field;
+            }
+
+        }
+
+        return $filtered;
 
     }
 
