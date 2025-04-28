@@ -93,8 +93,8 @@ add_shortcode('ffao_archive_browser', function () {
     }
 
     if (!empty($filters['order_num'])) {
-        $where .= " AND m_order.meta_value LIKE %s";
-        $params[] = '%' . $wpdb->esc_like($filters['order_num']) . '%';
+        $where .= " AND i.id LIKE %s";
+        $params[] = $wpdb->esc_like($filters['order_num']);
     }
 
     if (!empty($filters['common_search'])) {
@@ -125,7 +125,7 @@ add_shortcode('ffao_archive_browser', function () {
         FROM $archive_items i
         $where
         GROUP BY i.id
-        ORDER BY i.created_at DESC
+        ORDER BY i.id DESC
         LIMIT %d OFFSET %d
     ";
 
@@ -139,6 +139,8 @@ add_shortcode('ffao_archive_browser', function () {
     );
     $forms = [];
     foreach( $formsRaw as $form ) {
+        if( $form['name'] == '' ) { continue; }
+
         $forms[ $form['id'] ] = $form;  
     }
 
