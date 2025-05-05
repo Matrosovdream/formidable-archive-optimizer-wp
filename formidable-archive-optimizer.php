@@ -44,23 +44,14 @@ function frm_work()
 
 }
 
-//register_activation_hook(__FILE__, 'ffao_create_archive_tables');
+register_activation_hook(__FILE__, 'createArchiveTablesActivate');
+function createArchiveTablesActivate()
+{
+    $archiver = new Frm_optimizer_archive();
+    $archiver->createArchiveTables();
+}
 
 
 
 
 
-
-
-
-
-
-
-
-// Hook into Formidable to retrieve archived entries
-
-/*
-DROP TABLE wp_frm_items_archive;
-DROP TABLE wp_frm_item_metas_archive;
-DROP TABLE wp_frm_payments_archive;
-*/
