@@ -38,30 +38,25 @@ class Frm_entry_replacer
         // Get entry data
         $entry = $this->getEntry($entry_id);
 
-        // Get meta
-        if ($entry) {
-            $entry = $this->setEntryMeta($entry);
-        }
-
-        /*
-        echo "<pre>";
-        print_r($entry);
-        echo "</pre>";
-        die();
-        */
-
         return $entry;
     }
 
-    private function getEntry($entry_id)
+    public function getEntry($entry_id)
     {
 
         global $wpdb;
 
-        return $wpdb->get_row($wpdb->prepare(
+        $entry = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM {$this->table_items_archive} WHERE id = %d",
             $entry_id
         ));
+
+        // Set entry meta
+        if ($entry) {
+            $entry = $this->setEntryMeta($entry);
+        }
+
+        return $entry;
 
     }
 
@@ -85,13 +80,6 @@ class Frm_entry_replacer
 
     private function processEntryMeta( $metas, $entry ) {
 
-        /*
-        echo "<pre>";
-        print_r($metas); 
-        echo "</pre>";
-        die();
-        */
-
         $field_ids = [];
         
         foreach ($metas as $meta_val) {
@@ -101,8 +89,6 @@ class Frm_entry_replacer
 
             if ($meta_val->item_id == $entry->id) {
                 $entry->metas[$meta_val->field_id] = $meta_val->meta_value;
-
-                //continue;
             }
 
             // include sub entries in an array
@@ -127,13 +113,6 @@ class Frm_entry_replacer
         }
         $entry->fields = $fields;
 
-        /*
-        echo "<pre>";
-        print_r($fields); 
-        echo "</pre>";
-        die();
-        */
-        
         return $entry;
 
     }

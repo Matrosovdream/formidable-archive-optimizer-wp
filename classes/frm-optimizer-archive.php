@@ -6,6 +6,7 @@ class Frm_optimizer_archive
     private $settings;
     private $tables;
     public $archive_period; // In months
+    private $entryReplacer;
 
     public function __construct()
     {
@@ -16,6 +17,9 @@ class Frm_optimizer_archive
 
         // Archive period
         $this->archive_period = 6; // 6 months
+
+        // Include entry replacer
+        $this->entryReplacer = new Frm_entry_replacer();
 
     }
 
@@ -168,7 +172,7 @@ class Frm_optimizer_archive
 
         // Get details for entries
         foreach ($entries as $key => $entry) {
-            $entries[$key] = FrmEntry::getOne($entry['id'], true);
+            $entries[$key] = $this->entryReplacer->getEntry($entry['id']);
         }
 
         return [
