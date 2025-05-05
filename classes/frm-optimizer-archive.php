@@ -184,8 +184,10 @@ class Frm_optimizer_archive
 
         global $wpdb;
 
+        $forms_table = $this->tables['frm_forms'];
+
         $formsRaw = $wpdb->get_results(
-            "SELECT id, name FROM {$wpdb->prefix}frm_forms WHERE status = 'published' ORDER BY name ASC",
+            "SELECT id, name FROM {$forms_table} WHERE status = 'published' ORDER BY name ASC",
             ARRAY_A
         );
         $forms = [];

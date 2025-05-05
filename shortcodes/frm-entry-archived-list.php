@@ -5,10 +5,7 @@ add_shortcode('frm_entry_archived_list', function () {
 
     // Add TailwindCSS
     $output = '<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">';
-
-    $archive_items = "{$wpdb->prefix}frm_items_archive";
-    $archive_metas = "{$wpdb->prefix}frm_item_metas_archive";
-
+    
     // Process Restore Action
     if (!empty($_POST['ffao_action']) && $_POST['ffao_action'] === 'restore' && !empty($_POST['selected_ids'])) {
 
