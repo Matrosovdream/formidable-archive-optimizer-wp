@@ -8,9 +8,6 @@ add_shortcode('frm_entry_archived_list', function () {
 
     $archive_items = "{$wpdb->prefix}frm_items_archive";
     $archive_metas = "{$wpdb->prefix}frm_item_metas_archive";
-    $items_table = "{$wpdb->prefix}frm_items";
-    $metas_table = "{$wpdb->prefix}frm_item_metas";
-
 
     // Process Restore Action
     if (!empty($_POST['ffao_action']) && $_POST['ffao_action'] === 'restore' && !empty($_POST['selected_ids'])) {
@@ -19,8 +16,8 @@ add_shortcode('frm_entry_archived_list', function () {
         check_admin_referer('ffao_bulk_action');
 
         // Restore selected entries
-        $archive = new Frm_optimizer_archive();
-        $archive->restoreEntries( $ids = $_POST['selected_ids'] );
+        $archiver = new Frm_optimizer_archive();
+        $archiver->restoreEntries( $ids = $_POST['selected_ids'] );
         
         echo '<div class="max-w-7xl mx-auto bg-green-200 text-green-800 p-4 rounded mb-4">✅ Restored ' . count($ids) . ' entries successfully.</div>';
     }
@@ -32,75 +29,29 @@ add_shortcode('frm_entry_archived_list', function () {
         'common_search' => sanitize_text_field($_GET['common_search'] ?? ''),
     ];
 
+    // Set page and offset
     $page = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
     $per_page = 30;
     $offset = ($page - 1) * $per_page;
 
-    // Build WHERE
-    $where = "WHERE 1=1";
-    $params = [];
-
-    if (!empty($filters['form_id'])) {
-        $where .= " AND i.form_id = %d";
-        $params[] = $filters['form_id'];
-    }
-
-    if (!empty($filters['order_num'])) {
-        $where .= " AND i.id LIKE %s";
-        $params[] = $wpdb->esc_like($filters['order_num']);
-    }
-
-    if (!empty($filters['common_search'])) {
-        $common = '%' . $wpdb->esc_like($filters['common_search']) . '%';
-        $where .= " AND EXISTS (
-            SELECT 1 FROM {$archive_metas} m_common
-            WHERE m_common.item_id = i.id
-              AND m_common.meta_value LIKE %s
-        )";
-        $params[] = $common;
-    }
-
-    // Count total
-    $count_sql = "
-        SELECT COUNT(DISTINCT i.id)
-        FROM $archive_items i
-        $where
-    ";
-
-    $total = $wpdb->get_var($wpdb->prepare($count_sql, ...$params));
-
-    // Fetch entries
-    $sql = "
-        SELECT 
-            i.id,
-            i.form_id,
-            i.created_at
-        FROM $archive_items i
-        $where
-        GROUP BY i.id
-        ORDER BY i.id DESC
-        LIMIT %d OFFSET %d
-    ";
-
-    $query_params = array_merge($params, [$per_page, $offset]);
-    $entries = $wpdb->get_results($wpdb->prepare($sql, ...$query_params), ARRAY_A);
-
-    // Forms
-    $formsRaw = $wpdb->get_results(
-        "SELECT id, name FROM {$wpdb->prefix}frm_forms WHERE status = 'published' ORDER BY name ASC",
-        ARRAY_A
+    // Get entries
+    $archiver = new Frm_optimizer_archive();
+    $result = $archiver->getEntries(
+        $filters, 
+        $paginate = [
+            'per_page' => $per_page,
+            'offset' => $offset,
+        ]
     );
-    $forms = [];
-    foreach( $formsRaw as $form ) {
-        if( $form['name'] == '' ) { continue; }
+    // Convert into variables
+    $entries = $result['entries'] ?? [];
+    $total = $result['total'] ?? 0;
+    $total_pages = $result['total_pages'] ?? 0;
+    $current_page = $result['current_page'] ?? 1;
+    
+    // Get formidable forms
+    $forms = $archiver->getFrmForms();
 
-        $forms[ $form['id'] ] = $form;  
-    }
-
-    // Get details for entries
-    foreach( $entries as $key=>$entry ) {
-        $entries[$key] = FrmEntry::getOne($entry['id'], true);
-    }
 
     if( $_GET['lgg'] ) {
         echo "<pre>";
