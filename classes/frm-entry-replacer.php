@@ -161,7 +161,7 @@ class Frm_entry_replacer
 
         $filtered = [];
         $types = ['email', 'phone'];
-        $titles = ['DOT #', 'Status'];
+        $titles = ['DOT #', 'Status', 'USDOT#'];
 
         foreach ($fields as $field) {
 

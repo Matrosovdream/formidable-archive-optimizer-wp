@@ -4,6 +4,7 @@ class Frm_optimizer_archive {
 
     private $settings;
     private $tables;
+    public $archive_period; // In months
 
     public function __construct()
     {
@@ -11,6 +12,9 @@ class Frm_optimizer_archive {
         // Prepare settings
         $settings = (new Frm_optimizer_settings())->getSettings();
         $this->tables = $settings['tables'];
+
+        // Archive period
+        $this->archive_period = 6; // 6 months
 
     }
 
@@ -32,11 +36,12 @@ class Frm_optimizer_archive {
         $metas_table = $this->tables['frm_item_metas_default'];
         $items_archive = $this->tables['frm_items_archive'];
         $metas_archive = $this->tables['frm_item_metas_archive'];
+        $period = $this->archive_period;
     
         // Get old item IDs
         $old_ids = $wpdb->get_col("
             SELECT id FROM $items_table
-            WHERE created_at < NOW() - INTERVAL 6 MONTH
+            WHERE created_at < NOW() - INTERVAL $period MONTH
         ");
     
         if (empty($old_ids)) return 0;
