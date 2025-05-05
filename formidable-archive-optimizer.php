@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Formidable Archive Optimizer
  * Description: Moves old Formidable Forms entries to archive tables and still allows access by entry ID.
- * Version: 1.0
- * Author: Your Name
+ * Version: 1.0.0
+ * Author: Stan Matrosov
  */
 
 // Variables
@@ -21,29 +21,8 @@ require_once FRM_OPT_URL . '/classes/frm-optimizer-admin.php';
 require_once FRM_OPT_URL . '/shortcodes/frm-entry-archived-list.php';
 
 
-add_action('init', 'frm_work');
-function frm_work()
-{
 
-    if (isset($_GET['create_tables'])) {
-
-        ffao_create_archive_tables();
-        die();
-
-    }
-
-    if (isset($_GET['migrate'])) {
-        ffao_archive_old_entries();
-        die();
-    }
-
-    if (isset($_GET['restore'])) {
-        ffao_restore_all_archived_entries();
-        die();
-    }
-
-}
-
+// Activate plugin hook
 register_activation_hook(__FILE__, 'createArchiveTablesActivate');
 function createArchiveTablesActivate()
 {
