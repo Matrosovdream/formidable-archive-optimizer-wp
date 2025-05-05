@@ -16,7 +16,7 @@ class Frm_optimizer_archive
         $this->tables = $settings['tables'];
 
         // Archive period
-        $this->archive_period = 6; // 6 months
+        $this->archive_period = FRM_ARCHIVE_PERIOD ?? 6; // 6 months
 
         // Include entry replacer
         $this->entryReplacer = new Frm_entry_replacer();
@@ -35,7 +35,7 @@ class Frm_optimizer_archive
     }
 
 
-    public function archiveEntries()
+    public function archiveEntries( $period = null )
     {
 
         global $wpdb;
@@ -43,7 +43,7 @@ class Frm_optimizer_archive
         $metas_table = $this->tables['frm_item_metas_default'];
         $items_archive = $this->tables['frm_items_archive'];
         $metas_archive = $this->tables['frm_item_metas_archive'];
-        $period = $this->archive_period;
+        $period = $period ?? $period :: $this->archive_period;
 
         // Get old item IDs
         $old_ids = $wpdb->get_col("

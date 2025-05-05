@@ -9,6 +9,7 @@
 // Variables
 define('FRM_OPT_URL', __DIR__);
 define('FRM_OPT_ASSETS', plugins_url('formidable-optimizer-wp/assets/'));
+define('FRM_ARCHIVE_PERIOD', 4); // Archive entries older than this many months
 
 // Include classes
 require_once FRM_OPT_URL . '/classes/frm-optimizer-settings.php';

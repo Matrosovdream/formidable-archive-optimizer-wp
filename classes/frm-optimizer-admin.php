@@ -68,6 +68,12 @@ class Frm_optimizer_admin {
             <div class="fo-section">
                 <h2>Archive Entries</h2>
                 <p>Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong></p>
+
+                <!-- Archive period -->
+                <p>Archive entries older than: 
+                    <input type="number" id="archive-period" value="<?php echo FRM_ARCHIVE_PERIOD; ?>" min="1" style="width: 60px;"> months
+                </p>
+
                 <button id="fo-archive-btn" class="button button-primary">Archive Entries</button>
                 <div id="fo-archive-msg" class="fo-msg"></div>
             </div>
@@ -100,7 +106,7 @@ class Frm_optimizer_admin {
         }
 
         // Archive all entries
-        $this->optimizerArchive->archiveEntries();
+        $this->optimizerArchive->archiveEntries( $period=$_POST['archivePeriod'] );
 
         // TODO: real logic to archive entries
         wp_send_json_success(['message' => 'Entries have been archived.']);
