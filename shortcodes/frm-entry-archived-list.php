@@ -11,18 +11,17 @@ add_shortcode('frm_entry_archived_list', function () {
     $items_table = "{$wpdb->prefix}frm_items";
     $metas_table = "{$wpdb->prefix}frm_item_metas";
 
+
     // Process Restore Action
     if (!empty($_POST['ffao_action']) && $_POST['ffao_action'] === 'restore' && !empty($_POST['selected_ids'])) {
+
+        // Check nonce for security
         check_admin_referer('ffao_bulk_action');
-        $ids = array_map('intval', $_POST['selected_ids']);
-        $ids_in = implode(',', $ids);
 
         // Restore selected entries
-        $wpdb->query("INSERT IGNORE INTO $items_table SELECT * FROM $archive_items WHERE id IN ($ids_in)");
-        $wpdb->query("INSERT IGNORE INTO $metas_table SELECT * FROM $archive_metas WHERE item_id IN ($ids_in)");
-        $wpdb->query("DELETE FROM $archive_metas WHERE item_id IN ($ids_in)");
-        $wpdb->query("DELETE FROM $archive_items WHERE id IN ($ids_in)");
-
+        $archive = new Frm_optimizer_archive();
+        $archive->restoreEntries( $ids = $_POST['selected_ids'] );
+        
         echo '<div class="max-w-7xl mx-auto bg-green-200 text-green-800 p-4 rounded mb-4">✅ Restored ' . count($ids) . ' entries successfully.</div>';
     }
 

@@ -59,8 +59,28 @@ class Frm_optimizer_archive {
         return count($old_ids);
 
     }
+
+    public function restoreEntries( array $entry_ids ) {
+
+        global $wpdb;
+        $items_table = $this->tables['frm_items_default'];
+        $metas_table = $this->tables['frm_item_metas_default'];
+        $items_archive = $this->tables['frm_items_archive'];
+        $metas_archive = $this->tables['frm_item_metas_archive'];
+
+        // Prepare entry IDs for SQL
+        $entry_ids = implode(',', array_map('intval', $entry_ids));
+
+        $wpdb->query("INSERT IGNORE INTO $items_table SELECT * FROM $items_archive WHERE id IN ($entry_ids)");
+        $wpdb->query("INSERT IGNORE INTO $metas_table SELECT * FROM $metas_archive WHERE item_id IN ($entry_ids)");
+        $wpdb->query("DELETE FROM $metas_archive WHERE item_id IN ($entry_ids)");
+        $wpdb->query("DELETE FROM $items_archive WHERE id IN ($entry_ids)");
+
+        return true;
+
+    }
     
-    public function restoreEntries() {
+    public function restoreAllEntries() {
 
         global $wpdb;
         $items_table = $this->tables['frm_items_default'];
