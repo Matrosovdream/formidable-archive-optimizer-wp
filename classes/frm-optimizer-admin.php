@@ -3,12 +3,16 @@
 class Frm_optimizer_admin {
 
     private $helper;
+    private $optimizerArchive;
 
     public function __construct() {
 
         $this->helper = new Frm_optimize_helper();
 
         $this->addHooks();
+
+        // Include optimizer archive
+        $this->optimizerArchive = new Frm_optimizer_archive();
     }
 
     public function addHooks() {
@@ -89,12 +93,30 @@ class Frm_optimizer_admin {
     public function ajax_archive_entries() {
         check_ajax_referer('frm_optimizer_nonce', 'nonce');
 
+        // Check if the user has permission
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'You do not have permission to perform this action.']);
+            return;
+        }
+
+        // Archive all entries
+        $this->optimizerArchive->archiveEntries();
+
         // TODO: real logic to archive entries
         wp_send_json_success(['message' => 'Entries have been archived.']);
     }
 
     public function ajax_restore_entries() {
         check_ajax_referer('frm_optimizer_nonce', 'nonce');
+
+        // Check if the user has permission
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'You do not have permission to perform this action.']);
+            return;
+        }
+
+        // Restore all entries
+        $this->optimizerArchive->restoreAllEntries();
 
         // TODO: real logic to restore entries
         wp_send_json_success(['message' => 'Entries have been restored.']);
