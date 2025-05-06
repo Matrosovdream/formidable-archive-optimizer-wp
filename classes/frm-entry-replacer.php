@@ -142,13 +142,6 @@ class Frm_entry_replacer
         $types = ['email', 'phone'];
         $titles = ['DOT #', 'Status', 'USDOT#', 'USDOT #'];
 
-        /*
-        echo "<pre>";
-        print_r($fields);
-        echo "</pre>";
-        die();
-        */
-
         foreach ($fields as $field) {
 
             // Filter by titles
