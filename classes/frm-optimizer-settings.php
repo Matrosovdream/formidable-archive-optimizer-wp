@@ -22,6 +22,7 @@ class Frm_optimizer_settings
             'tables' => $this->getTables(),
             'fields' => $this->getFields(),
             'fieldsMapped' => $this->getFieldsMapped(),
+            'enabledForms' => $this->getEnabledForms(),
         ];
 
     }
@@ -87,13 +88,17 @@ class Frm_optimizer_settings
 
     }
 
+    public function getEnabledForms()
+    {
+        $enabled_forms = get_option('frm_optimizer_enabled_forms', []);
+        return $enabled_forms;
+    }
+
     public function getFrmForms()
     {
-
         global $wpdb;
         $table = $this->getTables()['frm_forms'];
         return $wpdb->get_results("SELECT * FROM $table", ARRAY_A);
-
     }
 
 }
