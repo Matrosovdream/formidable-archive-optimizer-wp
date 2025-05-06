@@ -28,13 +28,15 @@ class Frm_optimize_helper
     public function getDefaultEntryCount()
     {
         global $wpdb;
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}frm_items");
+        $table = $this->tables['frm_items_default'];
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
     }
 
     public function getArchiveEntryCount()
     {
         global $wpdb;
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}frm_items_archive");
+        $table = $this->tables['frm_items_archive'];
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
     }
 
     public function getEntriesForArchive($filter = [])
@@ -42,6 +44,7 @@ class Frm_optimize_helper
 
         global $wpdb;
         $items_table = $this->tables['frm_items_default'];
+        $items_metas_table = $this->tables['frm_item_metas_default'];
 
         $settings = (new Frm_optimizer_settings())->getSettings();
         $fieldsMapped = $settings['fieldsMapped'];
@@ -72,7 +75,7 @@ class Frm_optimize_helper
 
                 $where[] = "
                 EXISTS (
-                    SELECT 1 FROM {$wpdb->prefix}frm_item_metas m
+                    SELECT 1 FROM $items_metas_table m
                     WHERE m.item_id = i.id
                     AND (
                         ".implode(' OR ', $status_sql)."

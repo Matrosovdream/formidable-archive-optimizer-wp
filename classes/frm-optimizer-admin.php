@@ -67,7 +67,10 @@ class Frm_optimizer_admin {
 
             <div class="fo-section">
                 <h2>Archive Entries</h2>
-                <p>Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong></p>
+                <p>
+                    Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong>
+                    (Completed, Failed)
+                </p>
 
                 <!-- Archive period -->
                 <p>Archive entries older than: 
