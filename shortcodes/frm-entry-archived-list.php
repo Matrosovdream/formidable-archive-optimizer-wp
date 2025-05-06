@@ -52,7 +52,7 @@ add_shortcode('frm_entry_archived_list', function () {
 
     if( $_GET['lgg'] ) {
         echo "<pre>";
-        print_r($entries); 
+        print_r($forms); 
         echo "</pre>";
         die();
     }

@@ -125,16 +125,19 @@ class Frm_optimizer_archive
         $where = "WHERE 1=1";
         $params = [];
 
-        if (!empty($filters['form_id'])) {
-            $where .= " AND i.form_id = %d";
-            $params[] = $filters['form_id'];
-        }
+        // Filter by enabled forms
+        $enabled_forms = (new Frm_optimizer_settings())->getEnabledForms();
+        $where .= " AND i.form_id IN (" . implode(',', array_map('intval', $enabled_forms)) . ")";
 
+        //print_r($params); die();
+
+         // Filter by order number
         if (!empty($filters['order_num'])) {
             $where .= " AND i.id LIKE %s";
             $params[] = $wpdb->esc_like($filters['order_num']);
         }
 
+        // Search in all metas
         if (!empty($filters['common_search'])) {
             $common = '%' . $wpdb->esc_like($filters['common_search']) . '%';
             $where .= " AND EXISTS (
@@ -201,6 +204,16 @@ class Frm_optimizer_archive
             }
 
             $forms[$form['id']] = $form;
+        }
+
+        // Get enabled forms
+        $enabled_forms = (new Frm_optimizer_settings())->getEnabledForms();
+
+        // Filter forms
+        foreach ($forms as $form_id => $form) {
+            if (!in_array($form_id, $enabled_forms)) {
+                unset($forms[$form_id]);
+            }
         }
 
         return $forms;
