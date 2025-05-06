@@ -6,12 +6,8 @@ class Frm_optimizer_admin {
     private $optimizerArchive;
 
     public function __construct() {
-
         $this->helper = new Frm_optimize_helper();
-
         $this->addHooks();
-
-        // Include optimizer archive
         $this->optimizerArchive = new Frm_optimizer_archive();
     }
 
@@ -21,6 +17,7 @@ class Frm_optimizer_admin {
 
         add_action('wp_ajax_frm_archive_entries', array($this, 'ajax_archive_entries'));
         add_action('wp_ajax_frm_restore_entries', array($this, 'ajax_restore_entries'));
+        add_action('wp_ajax_frm_save_form_field_settings', array($this, 'ajax_save_form_field_settings'));
     }
 
     public function frm_register_optimizer_page() {
@@ -41,7 +38,7 @@ class Frm_optimizer_admin {
 
         wp_enqueue_script(
             'frm-optimizer-js',
-            FRM_OPT_ASSETS.'frm-optimizer.js',
+            FRM_OPT_ASSETS . 'frm-optimizer.js',
             array('jquery'),
             null,
             true
@@ -53,8 +50,8 @@ class Frm_optimizer_admin {
         ));
 
         wp_enqueue_style(
-            'frm-optimizer-css', 
-            FRM_OPT_ASSETS.'frm-optimizer.css'
+            'frm-optimizer-css',
+            FRM_OPT_ASSETS . 'frm-optimizer.css'
         );
     }
 
@@ -72,8 +69,7 @@ class Frm_optimizer_admin {
                     (Completed, Failed)
                 </p>
 
-                <!-- Archive period -->
-                <p>Archive entries older than: 
+                <p>Archive entries older than:
                     <input type="number" id="archive-period" value="<?php echo FRM_ARCHIVE_PERIOD; ?>" min="1" style="width: 60px;"> months
                 </p>
 
@@ -87,18 +83,72 @@ class Frm_optimizer_admin {
                 <button id="fo-restore-btn" class="button button-secondary">Restore Entries</button>
                 <div id="fo-restore-msg" class="fo-msg"></div>
             </div>
+
+            <div class="fo-section">
+                <h2>Form Field Settings</h2>
+                <form id="fo-form-settings">
+                    <table class="widefat fixed" id="fo-forms-table">
+                        <thead>
+                            <tr>
+                                <th>Form Name</th>
+                                <th>Field IDs (comma-separated)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $forms = FrmForm::getAll();
+                            $saved_settings = get_option('frm_optimizer_form_fields', []);
+                            foreach ($forms as $form):
+                                $field_ids = isset($saved_settings[$form->id]) ? implode(',', $saved_settings[$form->id]) : '';
+                                ?>
+                                <tr data-form-id="<?php echo esc_attr($form->id); ?>">
+                                    <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
+                                    <td>
+                                        <input type="text" name="forms[<?php echo $form->id; ?>]" value="<?php echo esc_attr($field_ids); ?>" style="width: 100%;" />
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <p>
+                        <button type="submit" class="button button-primary">Save Settings</button>
+                        <span id="fo-settings-msg" class="fo-msg"></span>
+                    </p>
+                </form>
+            </div>
         </div>
+
+        <script>
+        jQuery(document).ready(function ($) {
+            $('#fo-form-settings').on('submit', function (e) {
+                e.preventDefault();
+
+                const formData = {};
+                $('#fo-forms-table tbody tr').each(function () {
+                    const formId = $(this).data('form-id');
+                    const fieldInput = $(this).find('input[type="text"]').val().trim();
+                    const fieldArray = fieldInput !== '' ? fieldInput.split(',').map(s => s.trim()) : [];
+                    formData[formId] = fieldArray;
+                });
+
+                $.post(frm_optimizer.ajax_url, {
+                    action: 'frm_save_form_field_settings',
+                    nonce: frm_optimizer.nonce,
+                    data: formData
+                }, function (res) {
+                    $('#fo-settings-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
+                });
+            });
+        });
+        </script>
         <?php
     }
 
     private function get_total_entries() {
-
         $old_ids = $this->helper->getEntriesForArchive([
             'status' => ['Failed', 'Complete'],
         ]);
-
         return count($old_ids);
-
     }
 
     private function get_archived_entries() {
@@ -108,33 +158,44 @@ class Frm_optimizer_admin {
     public function ajax_archive_entries() {
         check_ajax_referer('frm_optimizer_nonce', 'nonce');
 
-        // Check if the user has permission
         if (!current_user_can('manage_options')) {
             wp_send_json_error(['message' => 'You do not have permission to perform this action.']);
             return;
         }
 
-        // Archive all entries
-        $this->optimizerArchive->archiveEntries( $period=$_POST['archivePeriod'] );
-
-        // TODO: real logic to archive entries
+        $this->optimizerArchive->archiveEntries($_POST['archivePeriod']);
         wp_send_json_success(['message' => 'Entries have been archived.']);
     }
 
     public function ajax_restore_entries() {
         check_ajax_referer('frm_optimizer_nonce', 'nonce');
 
-        // Check if the user has permission
         if (!current_user_can('manage_options')) {
             wp_send_json_error(['message' => 'You do not have permission to perform this action.']);
             return;
         }
 
-        // Restore all entries
         $this->optimizerArchive->restoreAllEntries();
-
-        // TODO: real logic to restore entries
         wp_send_json_success(['message' => 'Entries have been restored.']);
+    }
+
+    public function ajax_save_form_field_settings() {
+        check_ajax_referer('frm_optimizer_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
+
+        $raw_data = $_POST['data'] ?? [];
+        $sanitized = [];
+
+        foreach ($raw_data as $form_id => $fields) {
+            $sanitized[(int) $form_id] = array_filter(array_map('sanitize_text_field', (array)$fields));
+        }
+
+        update_option('frm_optimizer_form_fields', $sanitized);
+
+        wp_send_json_success(['message' => 'Settings saved']);
     }
 }
 
