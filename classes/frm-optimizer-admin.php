@@ -112,7 +112,9 @@ class Frm_optimizer_admin {
                     </table>
                     <p>
                         <button type="submit" class="button button-primary">Save Settings</button>
-                        <span id="fo-settings-msg" class="fo-msg"></span>
+                        <div id="fo-settings-msg" class="fo-msg">
+                            <span class="success-msg">Entries have been archived.</span>
+                        </div>
                     </p>
                 </form>
             </div>
@@ -136,7 +138,7 @@ class Frm_optimizer_admin {
                     nonce: frm_optimizer.nonce,
                     data: formData
                 }, function (res) {
-                    $('#fo-settings-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
+                    $('#fo-settings-msg').html('<span class="' + (res.success ? 'success-msg' : 'error-msg') + '">' + res.data.message + '</span>');
                 });
             });
         });
