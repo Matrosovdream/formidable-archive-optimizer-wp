@@ -89,7 +89,13 @@ class Frm_optimizer_admin {
     }
 
     private function get_total_entries() {
-        return $this->helper->getEntryCount()['default'] ?? 0;
+
+        $old_ids = $this->helper->getEntriesForArchive([
+            'status' => ['Failed', 'Complete'],
+        ]);
+
+        return count($old_ids);
+
     }
 
     private function get_archived_entries() {
