@@ -18,6 +18,7 @@ class Frm_optimizer_admin {
         add_action('wp_ajax_frm_archive_entries', array($this, 'ajax_archive_entries'));
         add_action('wp_ajax_frm_restore_entries', array($this, 'ajax_restore_entries'));
         add_action('wp_ajax_frm_save_form_field_settings', array($this, 'ajax_save_form_field_settings'));
+        add_action('wp_ajax_frm_save_enabled_forms', array($this, 'ajax_save_enabled_forms'));
     }
 
     public function frm_register_optimizer_page() {
@@ -58,6 +59,9 @@ class Frm_optimizer_admin {
     public function frm_display_optimizer_page() {
         $total_entries = $this->get_total_entries();
         $archived_entries = $this->get_archived_entries();
+        $forms = FrmForm::getAll();
+        $saved_settings = get_option('frm_optimizer_form_fields', []);
+        $enabled_forms = get_option('frm_optimizer_enabled_forms', []);
         ?>
         <div class="wrap">
             <h1>Formidable Optimizer</h1>
@@ -85,6 +89,25 @@ class Frm_optimizer_admin {
             </div>
 
             <div class="fo-section">
+                <h2>Enabled Forms</h2>
+                <form id="fo-enabled-forms-form">
+                    <p>Select which forms should be available in the archive interface:</p>
+                    <select name="enabled_forms[]" multiple size="8" style="width: 100%;">
+                        <?php foreach ($forms as $form): ?>
+                            <option value="<?php echo $form->id; ?>" <?php selected(in_array($form->id, $enabled_forms)); ?>>
+                                <?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <p>
+                        <button type="submit" class="button button-primary">Save Enabled Forms</button>
+                        <span id="fo-enabled-msg" class="fo-msg"></span>
+                    </p>
+                </form>
+            </div>
+
+            <?php if (!empty($enabled_forms)): ?>
+            <div class="fo-section">
                 <h2>Form Field Settings</h2>
                 <form id="fo-form-settings">
                     <table class="widefat fixed" id="fo-forms-table">
@@ -95,10 +118,8 @@ class Frm_optimizer_admin {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            $forms = FrmForm::getAll();
-                            $saved_settings = get_option('frm_optimizer_form_fields', []);
-                            foreach ($forms as $form):
+                            <?php foreach ($forms as $form):
+                                if (!in_array($form->id, $enabled_forms)) continue;
                                 $field_ids = isset($saved_settings[$form->id]) ? implode(',', $saved_settings[$form->id]) : '';
                                 ?>
                                 <tr data-form-id="<?php echo esc_attr($form->id); ?>">
@@ -112,16 +133,16 @@ class Frm_optimizer_admin {
                     </table>
                     <p>
                         <button type="submit" class="button button-primary">Save Settings</button>
-                        <div id="fo-settings-msg" class="fo-msg">
-                            <span class="success-msg">Entries have been archived.</span>
-                        </div>
+                        <span id="fo-settings-msg" class="fo-msg"></span>
                     </p>
                 </form>
             </div>
+            <?php endif; ?>
         </div>
 
         <script>
         jQuery(document).ready(function ($) {
+
             $('#fo-form-settings').on('submit', function (e) {
                 e.preventDefault();
 
@@ -138,9 +159,30 @@ class Frm_optimizer_admin {
                     nonce: frm_optimizer.nonce,
                     data: formData
                 }, function (res) {
-                    $('#fo-settings-msg').html('<span class="' + (res.success ? 'success-msg' : 'error-msg') + '">' + res.data.message + '</span>');
+                    $('#fo-settings-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
                 });
             });
+
+            $('#fo-enabled-forms-form').on('submit', function (e) {
+                e.preventDefault();
+
+                const selectedForms = [];
+                $('#fo-enabled-forms-form select[name="enabled_forms[]"] option:selected').each(function () {
+                    selectedForms.push($(this).val());
+                });
+
+                $.post(frm_optimizer.ajax_url, {
+                    action: 'frm_save_enabled_forms',
+                    nonce: frm_optimizer.nonce,
+                    forms: selectedForms
+                }, function (res) {
+                    $('#fo-enabled-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
+                    if (res.success) {
+                        location.reload(); // reload to update form field section
+                    }
+                });
+            });
+
         });
         </script>
         <?php
@@ -162,7 +204,6 @@ class Frm_optimizer_admin {
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error(['message' => 'You do not have permission to perform this action.']);
-            return;
         }
 
         $this->optimizerArchive->archiveEntries($_POST['archivePeriod']);
@@ -174,7 +215,6 @@ class Frm_optimizer_admin {
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error(['message' => 'You do not have permission to perform this action.']);
-            return;
         }
 
         $this->optimizerArchive->restoreAllEntries();
@@ -198,6 +238,20 @@ class Frm_optimizer_admin {
         update_option('frm_optimizer_form_fields', $sanitized);
 
         wp_send_json_success(['message' => 'Settings saved']);
+    }
+
+    public function ajax_save_enabled_forms() {
+        check_ajax_referer('frm_optimizer_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
+
+        $form_ids = isset($_POST['forms']) ? array_map('intval', (array) $_POST['forms']) : [];
+
+        update_option('frm_optimizer_enabled_forms', $form_ids);
+
+        wp_send_json_success(['message' => 'Enabled forms saved.']);
     }
 }
 
