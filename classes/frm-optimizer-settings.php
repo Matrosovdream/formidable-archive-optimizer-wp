@@ -20,6 +20,7 @@ class Frm_optimizer_settings
 
         return [
             'tables' => $this->getTables(),
+            'fields' => $this->getFields(),
             'fieldsMapped' => $this->getFieldsMapped(),
         ];
 
@@ -34,6 +35,15 @@ class Frm_optimizer_settings
             'frm_items_archive' => "{$this->prefix}frm_items_archive",
             'frm_item_metas_archive' => "{$this->prefix}frm_item_metas_archive",
             'frm_forms' => "{$this->prefix}frm_forms",
+        ];
+
+    }
+
+    public function getFields() {
+
+        return [
+            2 => [886, 964, 1013, 214, 215, 216, 168, 169],
+            7 => [720, 86]
         ];
 
     }
