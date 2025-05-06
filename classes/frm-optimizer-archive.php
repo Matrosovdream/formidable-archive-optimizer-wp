@@ -46,10 +46,10 @@ class Frm_optimizer_archive
         $period = $period ?? $period :: $this->archive_period;
 
         // Get old item IDs
-        $old_ids = $wpdb->get_col("
-            SELECT id FROM $items_table
-            WHERE created_at < NOW() - INTERVAL $period MONTH
-        ");
+        $old_ids = (new Frm_optimize_helper())->getEntriesForArchive([
+            'status' => ['Failed', 'Complete'],
+            'period' => $period
+        ]);
 
         if (empty($old_ids))
             return 0;

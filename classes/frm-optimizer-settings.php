@@ -1,11 +1,13 @@
 <?php
 
-class Frm_optimizer_settings {
+class Frm_optimizer_settings
+{
 
     private $settings;
     private $prefix;
 
-    public function __construct() {
+    public function __construct()
+    {
 
         global $wpdb;
 
@@ -13,15 +15,18 @@ class Frm_optimizer_settings {
 
     }
 
-    public function getSettings() {
+    public function getSettings()
+    {
 
         return [
-            'tables' => $this->getTables()
+            'tables' => $this->getTables(),
+            'fieldsMapped' => $this->getFieldsMapped(),
         ];
 
     }
 
-    private function getTables() {
+    public function getTables()
+    {
 
         return [
             'frm_items_default' => "{$this->prefix}frm_items",
@@ -29,6 +34,38 @@ class Frm_optimizer_settings {
             'frm_items_archive' => "{$this->prefix}frm_items_archive",
             'frm_item_metas_archive' => "{$this->prefix}frm_item_metas_archive",
             'frm_forms' => "{$this->prefix}frm_forms",
+        ];
+
+    }
+
+    public function getFieldsMapped()
+    {
+
+        /*
+        key => form_id,
+        value => [
+            'short_field_name' => field_id,
+        ]
+        */
+
+        return [
+            2 => [
+                "status" => 886,
+                "usdot" => 964
+            ],
+            7 => [
+                "status" => 720,
+                "usdot" => 86
+            ],
+            9 => [
+                "status" => 862,
+                "usdot" => 121
+            ],
+            11 => [
+                "status" => 868,
+                "usdot" => 697
+            ],
+
         ];
 
     }
