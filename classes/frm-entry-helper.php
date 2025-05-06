@@ -102,13 +102,4 @@ class Frm_optimize_helper
 
     }
 
-    public function getFrmForms()
-    {
-
-        global $wpdb;
-        $table = $this->tables['frm_forms'];
-        return $wpdb->get_results("SELECT * FROM $table", ARRAY_A);
-
-    }
-
 }

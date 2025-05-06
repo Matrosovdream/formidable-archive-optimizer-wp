@@ -12,6 +12,8 @@ class Frm_entry_replacer
 
         // Prepare settings
         $settings = (new Frm_optimizer_settings())->getSettings();
+        $this->settings = $settings;
+
         $tables = $settings['tables'];
         $this->table_items_archive = $tables['frm_items_archive'];
         $this->table_item_metas_archive = $tables['frm_item_metas_archive'];
@@ -100,7 +102,7 @@ class Frm_entry_replacer
         }
 
         // Extract fields info
-        $fields = $this->getFieldsInfo($field_ids);
+        $fields = $this->getFieldsInfo($field_ids, $entry->form_id);
 
         // Go through each field and set the value
         foreach ($fields as $field_id=>$field) {
@@ -117,7 +119,7 @@ class Frm_entry_replacer
 
     }
 
-    private function getFieldsInfo($field_ids)
+    private function getFieldsInfo($field_ids, $form_id)
     {
 
         global $wpdb;
@@ -131,32 +133,21 @@ class Frm_entry_replacer
             $fields[$field->id] = $field;
         }
 
-        return $this->filterFields($fields);
+        return $this->filterFields($fields, $form_id);
 
     }
 
-    private function filterFields($fields)
+    private function filterFields($fields, $form_id)
     {
 
-        $filtered = [];
-        $types = ['email', 'phone'];
-        $titles = ['DOT #', 'Status', 'USDOT#', 'USDOT #'];
-
-        foreach ($fields as $field) {
-
-            // Filter by titles
-            if (in_array($field->name, $titles)) {
-                $filtered[$field->id] = $field;
+        // Filter by $this->settings['fields']
+        foreach( $this->settings['fields'][$form_id] as $field_id ) {
+            if (isset($fields[$field_id])) {
+                $filtered_fields[$field_id] = $fields[$field_id];
             }
-
-            // Filter by types
-            if (in_array($field->type, $types)) {
-                $filtered[$field->id] = $field;
-            }
-
         }
 
-        return $filtered;
+        return $filtered_fields;
 
     }
 

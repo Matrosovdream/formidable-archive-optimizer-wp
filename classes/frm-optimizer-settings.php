@@ -41,10 +41,17 @@ class Frm_optimizer_settings
 
     public function getFields() {
 
-        return [
-            2 => [886, 964, 1013, 214, 215, 216, 168, 169],
-            7 => [720, 86]
-        ];
+        $forms = $this->getFrmForms();
+        $settings = get_option('frm_optimizer_form_fields', []);
+        
+        // Match form and field IDs
+        $fields = [];
+        foreach ($forms as $form) {
+            $form_id = $form['id'];
+            $fields[ $form_id ] = $settings[ $form_id ] ?? [];
+        }
+
+        return $fields;
 
     }
 
@@ -77,6 +84,15 @@ class Frm_optimizer_settings
             ],
 
         ];
+
+    }
+
+    public function getFrmForms()
+    {
+
+        global $wpdb;
+        $table = $this->getTables()['frm_forms'];
+        return $wpdb->get_results("SELECT * FROM $table", ARRAY_A);
 
     }
 
