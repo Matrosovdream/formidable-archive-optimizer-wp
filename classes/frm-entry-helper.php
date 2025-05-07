@@ -48,11 +48,17 @@ class Frm_optimize_helper
 
         $settings = (new Frm_optimizer_settings())->getSettings();
         $fieldsMapped = $settings['fieldsMapped'];
+        $enabledForms = $settings['enabledForms'];
 
         /* Filters start */
         $where = [];
 
         if (!empty($filter['status'])) {
+
+            // Filter by enabled forms
+            if (!empty($enabledForms)) {
+                $where[] = "i.form_id IN (" . implode(',', array_map('intval', $enabledForms)) . ")";
+            }
 
             // Extract all status values from $fieldsMapped
             $status_fields = [];
