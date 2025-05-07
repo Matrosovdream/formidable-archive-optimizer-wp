@@ -39,7 +39,7 @@ class Frm_optimizer_admin {
 
         wp_enqueue_script(
             'frm-optimizer-js',
-            FRM_OPT_ASSETS . 'frm-optimizer.js',
+            FRM_OPT_ASSETS . 'frm-optimizer.js?t=' . time(),
             array('jquery'),
             null,
             true
@@ -52,7 +52,7 @@ class Frm_optimizer_admin {
 
         wp_enqueue_style(
             'frm-optimizer-css',
-            FRM_OPT_ASSETS . 'frm-optimizer.css'
+            FRM_OPT_ASSETS . 'frm-optimizer.css?t=' . time(),
         );
     }
 
@@ -174,6 +174,7 @@ class Frm_optimizer_admin {
                     data: formData
                 }, function (res) {
                     $('#fo-settings-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
+                    if (res.success) { location.reload(); }
                 });
             });
 
@@ -191,9 +192,7 @@ class Frm_optimizer_admin {
                     forms: selectedForms
                 }, function (res) {
                     $('#fo-enabled-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
-                    if (res.success) {
-                        location.reload();
-                    }
+                    if (res.success) { location.reload(); }
                 });
             });
 

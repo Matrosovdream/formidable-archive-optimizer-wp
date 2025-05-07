@@ -24,10 +24,18 @@ jQuery(document).ready(function ($) {
         e.preventDefault();
         const archivePeriod = $('#archive-period').val(); // Get the value of the archive-period input field
         runAjax('frm_archive_entries', '#fo-archive-btn', '#fo-archive-msg', archivePeriod);
+
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
     });
 
     $('#fo-restore-btn').on('click', function (e) {
         e.preventDefault();
         runAjax('frm_restore_entries', '#fo-restore-btn', '#fo-restore-msg');
+
+        setTimeout(function () {
+            location.reload();
+        }, 1000);
     });
 });
