@@ -67,6 +67,10 @@ class Frm_optimize_helper
             // Prepare the status values for SQL
             $status_sql = [];
             foreach ($status_fields as $field_id) {
+                if( $field_id == 0 || $field_id == null ) {
+                    continue; // Skip if field_id is 0 or null
+                }
+
                 $status_sql[] = "(m.field_id = $field_id AND m.meta_value IN ($statuses))";
             }
 
@@ -90,13 +94,15 @@ class Frm_optimize_helper
         }
         /* Filters end */
 
-        // Prepare and send request
-        $old_ids = $wpdb->get_col("
+        $query = "
             SELECT i.id 
             FROM $items_table i
             WHERE 1=1 AND
             " . implode(' AND ', $where) . "
-        ");
+        ";
+
+        // Prepare and send request
+        $old_ids = $wpdb->get_col($query);
 
         return $old_ids;
 
