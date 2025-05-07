@@ -101,7 +101,7 @@ class Frm_optimizer_admin {
                     </select>
                     <p>
                         <button type="submit" class="button button-primary">Save Enabled Forms</button>
-                        <span id="fo-enabled-msg" class="fo-msg"></span>
+                        <div id="fo-enabled-msg" class="fo-msg"></div>
                     </p>
                 </form>
             </div>
@@ -139,7 +139,7 @@ class Frm_optimizer_admin {
                     </table>
                     <p>
                         <button type="submit" class="button button-primary">Save Settings</button>
-                        <span id="fo-settings-msg" class="fo-msg"></span>
+                        <div id="fo-settings-msg" class="fo-msg"></div>
                     </p>
                 </form>
             </div>
