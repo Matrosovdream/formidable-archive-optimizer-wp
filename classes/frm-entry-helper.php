@@ -58,6 +58,8 @@ class Frm_optimize_helper
             // Filter by enabled forms
             if (!empty($enabledForms)) {
                 $where[] = "i.form_id IN (" . implode(',', array_map('intval', $enabledForms)) . ")";
+            } else {
+                $where[] = "i.form_id IN (0)"; // No forms enabled, so no entries to archive
             }
 
             // Extract all status values from $fieldsMapped
