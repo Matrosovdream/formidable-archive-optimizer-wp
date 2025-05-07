@@ -44,13 +44,6 @@ class Frm_optimizer_settings
 
         $forms = $this->getFrmForms();
         $settings = get_option('frm_optimizer_form_fields', []);
-
-        /*
-        echo "<pre>";
-        print_r($settings);
-        echo "</pre>";
-        die();
-        */
         
         // Match form and field IDs
         $fields = [];
@@ -66,32 +59,25 @@ class Frm_optimizer_settings
     public function getFieldsMapped()
     {
 
+        $settings = get_option('frm_optimizer_form_fields', []);
+
+        $fields = [];
+        foreach ($settings as $form_id => $form_settings) {
+            $fields[ $form_id ] = [
+                'status' => $form_settings['status'] ?? null,
+                'usdot' => $form_settings['dot'] ?? null,
+                'email' => $form_settings['email'] ?? null,
+            ];
+        }
+
         /*
-        key => form_id,
-        value => [
-            'short_field_name' => field_id,
-        ]
+        echo "<pre>";
+        print_r($settings);
+        echo "</pre>";
+        die();
         */
-
-        return [
-            2 => [
-                "status" => 886,
-                "usdot" => 964
-            ],
-            7 => [
-                "status" => 720,
-                "usdot" => 86
-            ],
-            9 => [
-                "status" => 862,
-                "usdot" => 121
-            ],
-            11 => [
-                "status" => 868,
-                "usdot" => 697
-            ],
-
-        ];
+        
+        return $fields;
 
     }
 
