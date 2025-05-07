@@ -107,26 +107,32 @@ class Frm_optimizer_admin {
             </div>
 
             <?php if (!empty($enabled_forms)): ?>
-            <div class="fo-section">
+            <div class="fo-section" style="max-width: 100%;;">
                 <h2>Form Field Settings</h2>
                 <form id="fo-form-settings">
-                    <table class="widefat fixed" id="fo-forms-table">
+                    <table class="widefat fixed" id="fo-forms-table" style="width: 100%;">
                         <thead>
                             <tr>
                                 <th>Form Name</th>
-                                <th>Field IDs (comma-separated)</th>
+                                <th>Fields IDs</th>
+                                <th>Status</th>
+                                <th>Dot Number</th>
+                                <th>Email</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($forms as $form):
                                 if (!in_array($form->id, $enabled_forms)) continue;
-                                $field_ids = isset($saved_settings[$form->id]) ? implode(',', $saved_settings[$form->id]) : '';
+                                $data = $saved_settings[$form->id] ?? [];
                                 ?>
                                 <tr data-form-id="<?php echo esc_attr($form->id); ?>">
                                     <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
                                     <td>
-                                        <input type="text" name="forms[<?php echo $form->id; ?>]" value="<?php echo esc_attr($field_ids); ?>" style="width: 100%;" />
+                                        <textarea class="field-ids" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $data['field_ids'] ?? [])); ?></textarea>
                                     </td>
+                                    <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
+                                    <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
+                                    <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -149,9 +155,17 @@ class Frm_optimizer_admin {
                 const formData = {};
                 $('#fo-forms-table tbody tr').each(function () {
                     const formId = $(this).data('form-id');
-                    const fieldInput = $(this).find('input[type="text"]').val().trim();
-                    const fieldArray = fieldInput !== '' ? fieldInput.split(',').map(s => s.trim()) : [];
-                    formData[formId] = fieldArray;
+                    const field_ids = $(this).find('.field-ids').val().trim().split(',').map(s => s.trim()).filter(Boolean);
+                    const status = $(this).find('.field-status').val();
+                    const dot = $(this).find('.field-dot').val();
+                    const email = $(this).find('.field-email').val();
+
+                    formData[formId] = {
+                        field_ids: field_ids,
+                        status: status,
+                        dot: dot,
+                        email: email
+                    };
                 });
 
                 $.post(frm_optimizer.ajax_url, {
@@ -178,7 +192,7 @@ class Frm_optimizer_admin {
                 }, function (res) {
                     $('#fo-enabled-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
                     if (res.success) {
-                        location.reload(); // reload to update form field section
+                        location.reload();
                     }
                 });
             });
@@ -231,8 +245,14 @@ class Frm_optimizer_admin {
         $raw_data = $_POST['data'] ?? [];
         $sanitized = [];
 
-        foreach ($raw_data as $form_id => $fields) {
-            $sanitized[(int) $form_id] = array_filter(array_map('sanitize_text_field', (array)$fields));
+        foreach ($raw_data as $form_id => $data) {
+            $form_id = (int)$form_id;
+            $sanitized[$form_id] = [
+                'field_ids' => array_filter(array_map('sanitize_text_field', (array)($data['field_ids'] ?? []))),
+                'status' => sanitize_text_field($data['status'] ?? ''),
+                'dot' => sanitize_text_field($data['dot'] ?? ''),
+                'email' => sanitize_text_field($data['email'] ?? '')
+            ];
         }
 
         update_option('frm_optimizer_form_fields', $sanitized);
