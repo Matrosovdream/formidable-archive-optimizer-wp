@@ -165,61 +165,6 @@ class Frm_optimizer_admin {
             <?php endif; ?>
         </div>
 
-        <script>
-        jQuery(document).ready(function ($) {
-            $('#fo-form-settings').on('submit', function (e) {
-                e.preventDefault();
-                const formData = {};
-                $('#fo-forms-table tbody tr').each(function () {
-                    const formId = $(this).data('form-id');
-                    const field_ids = $(this).find('.field-ids').val().trim().split(',').map(s => s.trim()).filter(Boolean);
-                    const status = $(this).find('.field-status').val();
-                    const dot = $(this).find('.field-dot').val();
-                    const email = $(this).find('.field-email').val();
-                    formData[formId] = { field_ids, status, dot, email };
-                });
-
-                $.post(frm_optimizer.ajax_url, {
-                    action: 'frm_save_form_field_settings',
-                    nonce: frm_optimizer.nonce,
-                    data: formData
-                }, function (res) {
-                    $('#fo-settings-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
-                    if (res.success) location.reload();
-                });
-            });
-
-            $('#fo-enabled-forms-form').on('submit', function (e) {
-                e.preventDefault();
-                const selectedForms = [];
-                $('#fo-enabled-forms-form select[name="enabled_forms[]"] option:selected').each(function () {
-                    selectedForms.push($(this).val());
-                });
-
-                $.post(frm_optimizer.ajax_url, {
-                    action: 'frm_save_enabled_forms',
-                    nonce: frm_optimizer.nonce,
-                    forms: selectedForms
-                }, function (res) {
-                    $('#fo-enabled-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
-                    if (res.success) location.reload();
-                });
-            });
-
-            $('#fo-statuses-form').on('submit', function (e) {
-                e.preventDefault();
-                const statuses = $('#fo-statuses').val().trim().split(',').map(s => s.trim()).filter(Boolean);
-                $.post(frm_optimizer.ajax_url, {
-                    action: 'frm_save_statuses',
-                    nonce: frm_optimizer.nonce,
-                    statuses: statuses
-                }, function (res) {
-                    $('#fo-statuses-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
-                    if (res.success) location.reload();
-                });
-            });
-        });
-        </script>
         <?php
     }
 
