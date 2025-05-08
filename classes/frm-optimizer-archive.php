@@ -21,6 +21,9 @@ class Frm_optimizer_archive
         // Include entry replacer
         $this->entryReplacer = new Frm_entry_replacer();
 
+        // Include settings
+        $this->settings = new Frm_optimizer_settings();
+
     }
 
     public function createArchiveTables()
@@ -47,7 +50,7 @@ class Frm_optimizer_archive
 
         // Get old item IDs
         $old_ids = (new Frm_optimize_helper())->getEntriesForArchive([
-            'status' => ['Failed', 'Complete', 'Refunded'],
+            'status' => $this->settings->getEntryStatuses(),
             'period' => $period
         ]);
 
