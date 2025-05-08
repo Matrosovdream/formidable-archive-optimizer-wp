@@ -47,10 +47,16 @@ class Frm_optimizer_archive
         $items_archive = $this->tables['frm_items_archive'];
         $metas_archive = $this->tables['frm_item_metas_archive'];
         $period = $period ?? $period :: $this->archive_period;
+        $entryStatuses = $this->settings->getEntryStatuses();
+
+        // If no statuses are set then return
+        if (empty($entryStatuses)) {
+            return 0;
+        }
 
         // Get old item IDs
         $old_ids = (new Frm_optimize_helper())->getEntriesForArchive([
-            'status' => $this->settings->getEntryStatuses(),
+            'status' => $entryStatuses,
             'period' => $period
         ]);
 
