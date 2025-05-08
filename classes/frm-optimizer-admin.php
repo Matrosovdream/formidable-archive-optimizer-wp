@@ -70,7 +70,7 @@ class Frm_optimizer_admin {
                 <h2>Archive Entries</h2>
                 <p>
                     Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong>
-                    (Completed, Failed)
+                    (Completed, Failed, Refunded)
                 </p>
 
                 <p>Archive entries older than:
@@ -203,7 +203,7 @@ class Frm_optimizer_admin {
 
     private function get_total_entries() {
         $old_ids = $this->helper->getEntriesForArchive([
-            'status' => ['Failed', 'Complete'],
+            'status' => ['Failed', 'Complete', 'Refunded'],
         ]);
         return count($old_ids);
     }

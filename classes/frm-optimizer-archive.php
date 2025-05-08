@@ -47,7 +47,7 @@ class Frm_optimizer_archive
 
         // Get old item IDs
         $old_ids = (new Frm_optimize_helper())->getEntriesForArchive([
-            'status' => ['Failed', 'Complete'],
+            'status' => ['Failed', 'Complete', 'Refunded'],
             'period' => $period
         ]);
 
