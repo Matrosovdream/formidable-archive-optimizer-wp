@@ -64,6 +64,10 @@ class Frm_optimizer_admin {
         $saved_settings = get_option('frm_optimizer_form_fields', []);
         $enabled_forms = get_option('frm_optimizer_enabled_forms', []);
         $statuses = get_option('frm_optimizer_statuses', []);
+
+        $status_display = $statuses && is_array($statuses) && count($statuses) > 0
+                    ? implode(', ', array_map('esc_html', $statuses))
+                    : 'None';
         ?>
         <div class="wrap">
             <h1>Formidable Optimizer</h1>
@@ -72,8 +76,9 @@ class Frm_optimizer_admin {
                 <h2>Archive Entries</h2>
                 <p>
                     Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong>
-                    (Completed, Failed, Refunded)
+                    (Statuses: <?php echo $status_display; ?>)
                 </p>
+
                 <p>Archive entries older than:
                     <input type="number" id="archive-period" value="<?php echo FRM_ARCHIVE_PERIOD; ?>" min="1" style="width: 60px;"> months
                 </p>
