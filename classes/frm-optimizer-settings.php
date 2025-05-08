@@ -89,9 +89,7 @@ class Frm_optimizer_settings
     }
 
     public function getEntryStatuses() {
-
-        return get_option('frm_optimizer_statuses', []);
-
+        return get_option('frm_optimizer_statuses', []) ?? [];
     }
 
 }

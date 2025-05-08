@@ -3,12 +3,16 @@
 class Frm_optimizer_admin {
 
     private $helper;
+    private $settings;
     private $optimizerArchive;
 
     public function __construct() {
         $this->helper = new Frm_optimize_helper();
-        $this->addHooks();
+        $this->settings = new Frm_optimizer_settings();
         $this->optimizerArchive = new Frm_optimizer_archive();
+
+        $this->addHooks();
+        
     }
 
     public function addHooks() {
@@ -220,7 +224,8 @@ class Frm_optimizer_admin {
     }
 
     private function get_total_entries() {
-        $statuses = get_option('frm_optimizer_statuses', ['Failed', 'Complete', 'Refunded']);
+        $entryStatuses = $this->settings->getEntryStatuses();
+        $statuses = get_option('frm_optimizer_statuses', $entryStatuses);
         $old_ids = $this->helper->getEntriesForArchive(['status' => $statuses]);
         return count($old_ids);
     }
