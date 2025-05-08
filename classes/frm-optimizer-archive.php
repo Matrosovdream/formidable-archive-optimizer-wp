@@ -135,8 +135,21 @@ class Frm_optimizer_archive
         $params = [];
 
         // Filter by enabled forms
-        $enabled_forms = (new Frm_optimizer_settings())->getEnabledForms();
-        $where .= " AND i.form_id IN (" . implode(',', array_map('intval', $enabled_forms)) . ")";
+        if (!empty($filters['form_id']) && is_array($filters['form_id'])) {
+            $form_ids = implode(',', array_map('intval', $filters['form_id']));
+            $where .= " AND i.form_id IN ($form_ids)";
+        } elseif (!empty($filters['form_id'])) {
+            $where .= " AND i.form_id = %d";
+            $params[] = (int) $filters['form_id'];
+        } else {
+            // Get enabled forms
+            $enabled_forms = (new Frm_optimizer_settings())->getEnabledForms();
+            if (!empty($enabled_forms)) {
+                $where .= " AND i.form_id IN (" . implode(',', array_map('intval', $enabled_forms)) . ")";
+            } else {
+                $where .= " AND i.form_id IN (0)"; // No forms enabled, so no entries to show
+            }
+        }
 
         //print_r($params); die();
 
