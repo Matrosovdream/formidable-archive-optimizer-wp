@@ -128,7 +128,15 @@ add_shortcode('frm_entry_archived_list', function () {
                                     </td>
                                     <td class="px-4 py-2">
                                         <?php foreach( $entry->fields as $field ) { ?>
-                                            <b><?php echo esc_html($field->name); ?>:</b> <?php echo esc_html($field->value); ?> <br>
+                                            <b><?php echo esc_html($field->name); ?>:</b> 
+                                            <?php 
+                                                if (is_array($field->value)) {
+                                                    echo esc_html(implode(', ', $field->value));
+                                                } else {
+                                                    echo esc_html($field->value);
+                                                }
+                                            ?> 
+                                            <br>
                                         <?php } ?>
                                     </td>
                                     <td class="px-4 py-2">
