@@ -23,6 +23,7 @@ class Frm_optimizer_settings
             'fields' => $this->getFields(),
             'fieldsMapped' => $this->getFieldsMapped(),
             'enabledForms' => $this->getEnabledForms(),
+            'entryStatuses' => $this->getEntryStatuses(),
         ];
 
     }
@@ -70,13 +71,6 @@ class Frm_optimizer_settings
             ];
         }
 
-        /*
-        echo "<pre>";
-        print_r($settings);
-        echo "</pre>";
-        die();
-        */
-        
         return $fields;
 
     }
@@ -92,6 +86,12 @@ class Frm_optimizer_settings
         global $wpdb;
         $table = $this->getTables()['frm_forms'];
         return $wpdb->get_results("SELECT * FROM $table", ARRAY_A);
+    }
+
+    public function getEntryStatuses() {
+
+        return get_option('frm_optimizer_statuses', []);
+
     }
 
 }
