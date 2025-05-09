@@ -5,16 +5,6 @@ add_shortcode('frm_entry_list', function () {
 
     // Add TailwindCSS
     $output = '<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">';
-    
-    // Process Restore Action
-    if (!empty($_POST['ffao_action']) && $_POST['ffao_action'] === 'restore' && !empty($_POST['selected_ids'])) {
-        check_admin_referer('ffao_bulk_action');
-
-        $archiver = new Frm_optimizer_archive();
-        $archiver->restoreEntries($_POST['selected_ids']);
-        
-        echo '<div class="max-w-7xl mx-auto bg-green-200 text-green-800 p-4 rounded mb-4">✅ Restored ' . count($_POST['selected_ids']) . ' entries successfully.</div>';
-    }
 
     // Filters
     $filters = [
@@ -74,6 +64,7 @@ add_shortcode('frm_entry_list', function () {
 
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <div class="flex items-center gap-2">
+                    <!--
                     <select name="ffao_action" class="border p-2 rounded">
                         <option value="">Bulk Actions</option>
                         <option value="restore">Restore</option>
@@ -81,6 +72,7 @@ add_shortcode('frm_entry_list', function () {
                     <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                         Apply
                     </button>
+                    -->
                 </div>
                 <div class="text-base font-medium text-gray-800">
                     Total records: <strong><?php echo number_format($total); ?></strong>
@@ -95,8 +87,8 @@ add_shortcode('frm_entry_list', function () {
                             <th class="px-4 py-2"><input type="checkbox" id="select-all"></th>
                             <th class="px-4 py-2 text-left" style="width: 10%;">Order #</th>
                             <th class="px-4 py-2 text-left" style="width: 15%;">Form</th>
-                            <th class="px-4 py-2 text-left">Fields</th>
                             <th class="px-4 py-2 text-left" style="width: 15%;">Created at</th>
+                            <th class="px-4 py-2 text-left">Link</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -108,13 +100,10 @@ add_shortcode('frm_entry_list', function () {
                                 <td class="px-4 py-2"><?php echo esc_html($entry->id ?: '-'); ?></td>
                                 <td class="px-4 py-2"><?php echo $forms[$entry->form_id]['name'] ?? ''; ?></td>
                                 <td class="px-4 py-2">
-                                    <?php foreach ($entry->fields as $field): ?>
-                                        <b><?php echo esc_html($field->name); ?>:</b>
-                                        <?php echo esc_html(is_array($field->value) ? implode(', ', $field->value) : $field->value); ?><br>
-                                    <?php endforeach; ?>
+                                    <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
                                 </td>
                                 <td class="px-4 py-2">
-                                    <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
+                                    Link
                                 </td>
                             </tr>
                         <?php endforeach; else: ?>
