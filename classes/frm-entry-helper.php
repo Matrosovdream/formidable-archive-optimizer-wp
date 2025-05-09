@@ -32,6 +32,85 @@ class Frm_optimize_helper
         return (int) $wpdb->get_var("SELECT COUNT(*) FROM $table");
     }
 
+    public function getDefaultEntries($filters = [], array $paginate)
+    {
+
+        $per_page = $paginate['per_page'] ?? 10;
+        $offset = $paginate['offset'] ?? 0;
+
+        global $wpdb;
+
+        $items_default = $this->tables['frm_items_default'];
+        $metas_default = $this->tables['frm_item_metas_default'];
+
+        // Build WHERE
+        $where = "WHERE 1=1";
+        $params = [];
+
+        // Filter by enabled forms
+        if (!empty($filters['form_id']) && is_array($filters['form_id'])) {
+            $form_ids = implode(',', array_map('intval', $filters['form_id']));
+            $where .= " AND i.form_id IN ($form_ids)";
+        }
+
+         // Filter by order number
+        if (!empty($filters['order_num'])) {
+            $where .= " AND i.id LIKE %s";
+            $params[] = $wpdb->esc_like($filters['order_num']);
+        }
+
+        // Search in all metas
+        if (!empty($filters['common_search'])) {
+            $common = '%' . $wpdb->esc_like($filters['common_search']) . '%';
+            $where .= " AND EXISTS (
+                SELECT 1 FROM {$metas_default} m_common
+                WHERE m_common.item_id = i.id
+                AND m_common.meta_value LIKE %s
+            )";
+            $params[] = $common;
+        }
+
+        // Count total
+        $count_sql = "
+            SELECT COUNT(DISTINCT i.id)
+            FROM $items_default i
+            $where
+        ";
+
+        $total = $wpdb->get_var($wpdb->prepare($count_sql, ...$params));
+
+        // Fetch entries
+        $sql = "
+            SELECT 
+                i.id,
+                i.form_id,
+                i.created_at
+            FROM $items_default i
+            $where
+            GROUP BY i.id
+            ORDER BY i.id DESC
+            LIMIT %d OFFSET %d
+        ";
+
+        $query_params = array_merge($params, [$per_page, $offset]);
+        $entries = $wpdb->get_results($wpdb->prepare($sql, ...$query_params), ARRAY_A);
+
+        // Get details for entries
+        foreach ($entries as $key => $entry) {
+            $entries[$key] = FrmEntry::getOne($entry['id'], true);
+        }
+
+        return [
+            'entries' => $entries,
+            'total' => $total,
+            'total_pages' => ceil($total / $per_page),
+            'current_page' => $offset / $per_page + 1
+        ];
+
+    }
+
+
+
     public function getArchiveEntryCount()
     {
         global $wpdb;
