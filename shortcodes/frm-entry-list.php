@@ -26,13 +26,6 @@ add_shortcode('frm_entry_list', function () {
     $total_pages = $result['total_pages'] ?? 0;
     $current_page = $result['current_page'] ?? 1;
 
-    /*
-    echo "<pre>";
-    print_r($result);
-    echo "</pre>";
-    die();
-    */
-    
     // Get forms
     $forms = $helper->getDefaultForms();
 
@@ -110,7 +103,9 @@ add_shortcode('frm_entry_list', function () {
                                     <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
                                 </td>
                                 <td class="px-4 py-2">
-                                    Link
+                                    <a href="<?php echo esc_url($entry->url); ?>" class="text-blue-600 hover:underline">
+                                        View Entry
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; else: ?>
