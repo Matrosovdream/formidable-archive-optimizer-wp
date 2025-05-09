@@ -8,15 +8,12 @@ add_shortcode('frm_entry_archived_list', function () {
     
     // Process Restore Action
     if (!empty($_POST['ffao_action']) && $_POST['ffao_action'] === 'restore' && !empty($_POST['selected_ids'])) {
-
-        // Check nonce for security
         check_admin_referer('ffao_bulk_action');
 
-        // Restore selected entries
         $archiver = new Frm_optimizer_archive();
-        $archiver->restoreEntries( $ids = $_POST['selected_ids'] );
+        $archiver->restoreEntries($_POST['selected_ids']);
         
-        echo '<div class="max-w-7xl mx-auto bg-green-200 text-green-800 p-4 rounded mb-4">✅ Restored ' . count($ids) . ' entries successfully.</div>';
+        echo '<div class="max-w-7xl mx-auto bg-green-200 text-green-800 p-4 rounded mb-4">✅ Restored ' . count($_POST['selected_ids']) . ' entries successfully.</div>';
     }
 
     // Filters
@@ -26,42 +23,26 @@ add_shortcode('frm_entry_archived_list', function () {
         'common_search' => sanitize_text_field($_GET['common_search'] ?? ''),
     ];
 
-    // Set page and offset
+    // Pagination
     $page = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
     $per_page = 30;
     $offset = ($page - 1) * $per_page;
 
     // Get entries
     $archiver = new Frm_optimizer_archive();
-    $result = $archiver->getEntries(
-        $filters, 
-        $paginate = [
-            'per_page' => $per_page,
-            'offset' => $offset,
-        ]
-    );
-    // Convert into variables
+    $result = $archiver->getEntries($filters, ['per_page' => $per_page, 'offset' => $offset]);
     $entries = $result['entries'] ?? [];
     $total = $result['total'] ?? 0;
     $total_pages = $result['total_pages'] ?? 0;
     $current_page = $result['current_page'] ?? 1;
     
-    // Get formidable forms
+    // Get forms
     $forms = $archiver->getFrmForms();
 
-
-    if( $_GET['lgg'] ) {
-        echo "<pre>";
-        print_r($forms); 
-        echo "</pre>";
-        die();
-    }
-    
     ob_start();
     ?>
 
     <div class="max-w-7xl mx-auto p-4">
-
         <h2 class="text-3xl font-bold mb-6 text-gray-800">Archived Entries</h2>
 
         <!-- Filter Form -->
@@ -77,11 +58,8 @@ add_shortcode('frm_entry_archived_list', function () {
                 <?php endforeach; ?>
             </select>
 
-            <input type="text" name="order_num" placeholder="Order #" value="<?php echo esc_attr($filters['order_num']); ?>"
-                class="border rounded p-2" />
-
-            <input type="text" name="common_search" placeholder="Common Search..."
-                value="<?php echo esc_attr($filters['common_search']); ?>" class="border rounded p-2" />
+            <input type="text" name="order_num" placeholder="Order #" value="<?php echo esc_attr($filters['order_num']); ?>" class="border rounded p-2" />
+            <input type="text" name="common_search" placeholder="Common Search..." value="<?php echo esc_attr($filters['common_search']); ?>" class="border rounded p-2" />
 
             <div class="flex justify-end md:col-span-3">
                 <button type="submit" class="w-1/3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -94,13 +72,19 @@ add_shortcode('frm_entry_archived_list', function () {
         <form method="post">
             <?php wp_nonce_field('ffao_bulk_action'); ?>
 
-            <div class="flex items-center gap-4 mb-4">
-                <select name="ffao_action" class="border p-2 rounded">
-                    <option value="">Bulk Actions</option>
-                    <option value="restore">Restore</option>
-                </select>
-                <button type="submit"
-                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Apply</button>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                <div class="flex items-center gap-2">
+                    <select name="ffao_action" class="border p-2 rounded">
+                        <option value="">Bulk Actions</option>
+                        <option value="restore">Restore</option>
+                    </select>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                        Apply
+                    </button>
+                </div>
+                <div class="text-base font-medium text-gray-800">
+                    Total records: <strong><?php echo number_format($total); ?></strong>
+                </div>
             </div>
 
             <!-- Entries Table -->
@@ -116,34 +100,24 @@ add_shortcode('frm_entry_archived_list', function () {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
-                        <?php if ($entries):
-                            foreach ($entries as $entry): ?>
-                                <tr>
-                                    <td class="px-4 py-2 text-center">
-                                        <input type="checkbox" name="selected_ids[]" value="<?php echo esc_attr($entry->id); ?>">
-                                    </td>
-                                    <td class="px-4 py-2"><?php echo esc_html($entry->id ?: '-'); ?></td>
-                                    <td class="px-4 py-2">
-                                        <?php echo $forms[ $entry->form_id ]['name'] ?? ''; ?>
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <?php foreach( $entry->fields as $field ) { ?>
-                                            <b><?php echo esc_html($field->name); ?>:</b> 
-                                            <?php 
-                                                if (is_array($field->value)) {
-                                                    echo esc_html(implode(', ', $field->value));
-                                                } else {
-                                                    echo esc_html($field->value);
-                                                }
-                                            ?> 
-                                            <br>
-                                        <?php } ?>
-                                    </td>
-                                    <td class="px-4 py-2">
-                                        <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; else: ?>
+                        <?php if ($entries): foreach ($entries as $entry): ?>
+                            <tr>
+                                <td class="px-4 py-2 text-center">
+                                    <input type="checkbox" name="selected_ids[]" value="<?php echo esc_attr($entry->id); ?>">
+                                </td>
+                                <td class="px-4 py-2"><?php echo esc_html($entry->id ?: '-'); ?></td>
+                                <td class="px-4 py-2"><?php echo $forms[$entry->form_id]['name'] ?? ''; ?></td>
+                                <td class="px-4 py-2">
+                                    <?php foreach ($entry->fields as $field): ?>
+                                        <b><?php echo esc_html($field->name); ?>:</b>
+                                        <?php echo esc_html(is_array($field->value) ? implode(', ', $field->value) : $field->value); ?><br>
+                                    <?php endforeach; ?>
+                                </td>
+                                <td class="px-4 py-2">
+                                    <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; else: ?>
                             <tr>
                                 <td colspan="7" class="px-4 py-2 text-center text-gray-500">No archived entries found.</td>
                             </tr>
@@ -154,44 +128,32 @@ add_shortcode('frm_entry_archived_list', function () {
         </form>
 
         <!-- Pagination -->
-        <?php
-        $total_pages = ceil($total / $per_page);
-
-        if ($total_pages > 1): ?>
+        <?php if ($total_pages > 1): ?>
             <div class="flex justify-center mt-6 space-x-2">
-
                 <?php
-                $current_page = $page;
-                $range = 2; // How many pages to show around the current page
-        
                 for ($i = 1; $i <= $total_pages; $i++) {
                     if (
-                        $i <= 3 || // First 3 pages
-                        ($i >= $current_page - $range && $i <= $current_page + $range) || // Around current page
-                        $i > $total_pages - 3 // Last 3 pages
+                        $i <= 3 ||
+                        ($i >= $current_page - 2 && $i <= $current_page + 2) ||
+                        $i > $total_pages - 3
                     ) {
                         $active = ($i == $current_page) ? 'bg-blue-600 text-white' : 'bg-gray-200';
                         echo '<a href="' . esc_url(add_query_arg('paged', $i)) . '" class="px-4 py-2 ' . $active . ' rounded">' . $i . '</a>';
                     } elseif (
-                        ($i == 4 && $current_page > 6) || // Dot after page 3
-                        ($i == $total_pages - 3 && $current_page < $total_pages - 5) // Dot before last 3
+                        ($i == 4 && $current_page > 6) ||
+                        ($i == $total_pages - 3 && $current_page < $total_pages - 5)
                     ) {
                         echo '<span class="px-4 py-2">...</span>';
                     }
                 }
                 ?>
-
             </div>
         <?php endif; ?>
-
-
     </div>
 
     <script>
         document.getElementById('select-all')?.addEventListener('click', function (e) {
-            document.querySelectorAll('input[name="selected_ids[]"]').forEach(function (checkbox) {
-                checkbox.checked = e.target.checked;
-            });
+            document.querySelectorAll('input[name="selected_ids[]"]').forEach(cb => cb.checked = e.target.checked);
         });
     </script>
 
