@@ -213,13 +213,25 @@ class Frm_optimize_helper
     public function getDefaultForms()
     {
         $forms = FrmForm::getAll();
-        // To array
+
+        // To array map
         $forms = array_map(function ($form) {
             return [
                 'id' => $form->id,
                 'name' => $form->name
             ];
         }, $forms);
+
+        // Remove empty forms
+        $forms = array_filter($forms, function ($form) {
+            return !empty($form['name']);
+        });
+
+        // Sort by name
+        usort($forms, function ($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+
         return $forms;
     }
 
