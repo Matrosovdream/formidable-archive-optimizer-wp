@@ -51,6 +51,9 @@ class Frm_optimize_helper
         if (!empty($filters['form_id']) && is_array($filters['form_id'])) {
             $form_ids = implode(',', array_map('intval', $filters['form_id']));
             $where .= " AND i.form_id IN ($form_ids)";
+        } elseif (!empty($filters['form_id'])) {
+            $where .= " AND i.form_id = %d";
+            $params[] = (int) $filters['form_id'];
         }
 
          // Filter by order number
