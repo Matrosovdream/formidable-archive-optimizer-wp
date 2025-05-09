@@ -195,4 +195,17 @@ class Frm_optimize_helper
 
     }
 
+    public function getDefaultForms()
+    {
+        $forms = FrmForm::getAll();
+        // To array
+        $forms = array_map(function ($form) {
+            return [
+                'id' => $form->id,
+                'name' => $form->name
+            ];
+        }, $forms);
+        return $forms;
+    }
+
 }

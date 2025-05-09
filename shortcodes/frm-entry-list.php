@@ -19,15 +19,22 @@ add_shortcode('frm_entry_list', function () {
     $offset = ($page - 1) * $per_page;
 
     // Get entries
-    $archiver = new Frm_optimizer_archive();
-    $result = $archiver->getEntries($filters, ['per_page' => $per_page, 'offset' => $offset]);
+    $helper = new Frm_optimize_helper();
+    $result = $helper->getDefaultEntries($filters, ['per_page' => $per_page, 'offset' => $offset]);
     $entries = $result['entries'] ?? [];
     $total = $result['total'] ?? 0;
     $total_pages = $result['total_pages'] ?? 0;
     $current_page = $result['current_page'] ?? 1;
+
+    /*
+    echo "<pre>";
+    print_r($result);
+    echo "</pre>";
+    die();
+    */
     
     // Get forms
-    $forms = $archiver->getFrmForms();
+    $forms = $helper->getDefaultForms();
 
     ob_start();
     ?>
@@ -84,7 +91,7 @@ add_shortcode('frm_entry_list', function () {
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="px-4 py-2"><input type="checkbox" id="select-all"></th>
+                            <th class="px-4 py-2" style="width: 5%;"><input type="checkbox" id="select-all"></th>
                             <th class="px-4 py-2 text-left" style="width: 10%;">Order #</th>
                             <th class="px-4 py-2 text-left" style="width: 15%;">Form</th>
                             <th class="px-4 py-2 text-left" style="width: 15%;">Created at</th>
@@ -98,7 +105,7 @@ add_shortcode('frm_entry_list', function () {
                                     <input type="checkbox" name="selected_ids[]" value="<?php echo esc_attr($entry->id); ?>">
                                 </td>
                                 <td class="px-4 py-2"><?php echo esc_html($entry->id ?: '-'); ?></td>
-                                <td class="px-4 py-2"><?php echo $forms[$entry->form_id]['name'] ?? ''; ?></td>
+                                <td class="px-4 py-2"><?php echo $entry->form_name ?? ''; ?></td>
                                 <td class="px-4 py-2">
                                     <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
                                 </td>
