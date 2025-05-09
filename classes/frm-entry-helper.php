@@ -101,6 +101,9 @@ class Frm_optimize_helper
         // Get details for entries
         foreach ($entries as $key => $entry) {
             $entries[$key] = FrmEntry::getOne($entry['id'], true);
+
+            // Add extra params
+            $entries[$key]->url = $this->getEntryAdminUrl($entry['id']);
         }
 
         return [
@@ -112,6 +115,15 @@ class Frm_optimize_helper
 
     }
 
+    public function getEntryAdminUrl($entry_id)
+    {
+        return add_query_arg([
+            'page' => 'formidable-entries',
+            'frm_action' => 'show',
+            'id' => $entry_id
+        ], admin_url('admin.php'));
+
+    }
 
 
     public function getArchiveEntryCount()
