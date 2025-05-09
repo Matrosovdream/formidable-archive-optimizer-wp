@@ -33,7 +33,7 @@ add_shortcode('frm_entry_list', function () {
     ?>
 
     <div class="max-w-7xl mx-auto p-4">
-        <h2 class="text-3xl font-bold mb-6 text-gray-800">Archived Entries</h2>
+        <h2 class="text-3xl font-bold mb-6 text-gray-800">Formidable entries search</h2>
 
         <!-- Filter Form -->
         <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
