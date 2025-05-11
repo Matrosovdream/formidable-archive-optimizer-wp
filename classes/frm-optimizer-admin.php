@@ -10,9 +10,7 @@ class Frm_optimizer_admin {
         $this->helper = new Frm_optimize_helper();
         $this->settings = new Frm_optimizer_settings();
         $this->optimizerArchive = new Frm_optimizer_archive();
-
         $this->addHooks();
-        
     }
 
     public function addHooks() {
@@ -59,6 +57,29 @@ class Frm_optimizer_admin {
             'frm-optimizer-css',
             FRM_OPT_ASSETS . 'frm-optimizer.css?t=' . time()
         );
+
+        echo '<style>
+            .fo-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+            .fo-tab { padding: 8px 16px; border: 1px solid #ccc; cursor: pointer; }
+            .fo-tab.active { background: #0073aa; color: white; border-color: #0073aa; }
+            .fo-tab-content { display: none; }
+            .fo-tab-content.active { display: block; }
+        </style>';
+        echo '<script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const tabs = document.querySelectorAll(".fo-tab");
+                const contents = document.querySelectorAll(".fo-tab-content");
+                tabs.forEach((tab, idx) => {
+                    tab.addEventListener("click", () => {
+                        tabs.forEach(t => t.classList.remove("active"));
+                        contents.forEach(c => c.classList.remove("active"));
+                        tab.classList.add("active");
+                        contents[idx].classList.add("active");
+                    });
+                });
+                tabs[0].click();
+            });
+        </script>';
     }
 
     public function frm_display_optimizer_page() {
@@ -68,103 +89,109 @@ class Frm_optimizer_admin {
         $saved_settings = get_option('frm_optimizer_form_fields', []);
         $enabled_forms = get_option('frm_optimizer_enabled_forms', []);
         $statuses = get_option('frm_optimizer_statuses', []);
-
         $status_display = $statuses && is_array($statuses) && count($statuses) > 0
-                    ? implode(', ', array_map('esc_html', $statuses))
-                    : 'None';
+            ? implode(', ', array_map('esc_html', $statuses))
+            : 'None';
         ?>
         <div class="wrap">
             <h1>Formidable Optimizer</h1>
 
-            <div class="fo-section">
-                <h2>Archive Entries</h2>
-                <p>
-                    Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong>
-                    (Statuses: <?php echo $status_display; ?>)
-                </p>
-
-                <p>Archive entries older than:
-                    <input type="number" id="archive-period" value="<?php echo FRM_ARCHIVE_PERIOD; ?>" min="1" style="width: 60px;"> months
-                </p>
-                <button id="fo-archive-btn" class="button button-primary">Archive Entries</button>
-                <div id="fo-archive-msg" class="fo-msg"></div>
+            <div class="fo-tabs">
+                <div class="fo-tab active">Archiver Settings</div>
+                <div class="fo-tab">Full Search Settings</div>
             </div>
 
-            <div class="fo-section">
-                <h2>Restore Entries</h2>
-                <p>Archived Entries: <strong id="fo-archived"><?php echo $archived_entries; ?></strong></p>
-                <button id="fo-restore-btn" class="button button-secondary">Restore Entries</button>
-                <div id="fo-restore-msg" class="fo-msg"></div>
-            </div>
-
-            <div class="fo-section">
-                <h2>Enabled Forms</h2>
-                <form id="fo-enabled-forms-form">
-                    <p>Select which forms should be available in the archive interface:</p>
-                    <select name="enabled_forms[]" multiple size="8" style="width: 100%;">
-                        <?php foreach ($forms as $form): ?>
-                            <option value="<?php echo $form->id; ?>" <?php selected(in_array($form->id, $enabled_forms)); ?>>
-                                <?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+            <div class="fo-tab-content active">
+                <div class="fo-section">
+                    <h2>Archive Entries</h2>
                     <p>
-                        <button type="submit" class="button button-primary">Save Enabled Forms</button>
-                        <div id="fo-enabled-msg" class="fo-msg"></div>
+                        Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong>
+                        (Statuses: <?php echo $status_display; ?>)
                     </p>
-                </form>
+                    <p>Archive entries older than:
+                        <input type="number" id="archive-period" value="<?php echo FRM_ARCHIVE_PERIOD; ?>" min="1" style="width: 60px;"> months
+                    </p>
+                    <button id="fo-archive-btn" class="button button-primary">Archive Entries</button>
+                    <div id="fo-archive-msg" class="fo-msg"></div>
+                </div>
+
+                <div class="fo-section">
+                    <h2>Restore Entries</h2>
+                    <p>Archived Entries: <strong id="fo-archived"><?php echo $archived_entries; ?></strong></p>
+                    <button id="fo-restore-btn" class="button button-secondary">Restore Entries</button>
+                    <div id="fo-restore-msg" class="fo-msg"></div>
+                </div>
+
+                <div class="fo-section">
+                    <h2>Statuses</h2>
+                    <form id="fo-statuses-form">
+                        <p>Enter comma-separated status values for archiving:</p>
+                        <textarea id="fo-statuses" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $statuses)); ?></textarea>
+                        <p>
+                            <button type="submit" class="button button-primary">Save Statuses</button>
+                            <div id="fo-statuses-msg" class="fo-msg"></div>
+                        </p>
+                    </form>
+                </div>
             </div>
 
-            <div class="fo-section">
-                <h2>Statuses</h2>
-                <form id="fo-statuses-form">
-                    <p>Enter comma-separated status values for archiving:</p>
-                    <textarea id="fo-statuses" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $statuses)); ?></textarea>
-                    <p>
-                        <button type="submit" class="button button-primary">Save Statuses</button>
-                        <div id="fo-statuses-msg" class="fo-msg"></div>
-                    </p>
-                </form>
-            </div>
-
-            <?php if (!empty($enabled_forms)): ?>
-            <div class="fo-section" style="max-width: 100%;">
-                <h2>Form Field Settings</h2>
-                <form id="fo-form-settings">
-                    <table class="widefat fixed" id="fo-forms-table" style="width: 100%;">
-                        <thead>
-                            <tr>
-                                <th>Form Name</th>
-                                <th>Fields IDs</th>
-                                <th>Status</th>
-                                <th>Dot Number</th>
-                                <th>Email</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($forms as $form):
-                                if (!in_array($form->id, $enabled_forms)) continue;
-                                $data = $saved_settings[$form->id] ?? [];
-                                ?>
-                                <tr data-form-id="<?php echo esc_attr($form->id); ?>">
-                                    <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
-                                    <td><textarea class="field-ids" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $data['field_ids'] ?? [])); ?></textarea></td>
-                                    <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
-                                    <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
-                                    <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
-                                </tr>
+            <div class="fo-tab-content">
+                <div class="fo-section">
+                    <h2>Enabled Forms</h2>
+                    <form id="fo-enabled-forms-form">
+                        <p>Select which forms should be available in the archive interface:</p>
+                        <select name="enabled_forms[]" multiple size="8" style="width: 100%;">
+                            <?php foreach ($forms as $form): ?>
+                                <option value="<?php echo $form->id; ?>" <?php selected(in_array($form->id, $enabled_forms)); ?>>
+                                    <?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)
+                                </option>
                             <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <p>
-                        <button type="submit" class="button button-primary">Save Settings</button>
-                        <div id="fo-settings-msg" class="fo-msg"></div>
-                    </p>
-                </form>
-            </div>
-            <?php endif; ?>
-        </div>
+                        </select>
+                        <p>
+                            <button type="submit" class="button button-primary">Save Enabled Forms</button>
+                            <div id="fo-enabled-msg" class="fo-msg"></div>
+                        </p>
+                    </form>
+                </div>
 
+                <div class="fo-section" style="max-width: 100%;">
+                    <h2>Form Field Settings</h2>
+                    <form id="fo-form-settings">
+                        <table class="widefat fixed" id="fo-forms-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Form Name</th>
+                                    <th>Fields IDs</th>
+                                    <th>Status</th>
+                                    <th>Dot Number</th>
+                                    <th>Email</th>
+                                    <th>View</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($forms as $form):
+                                    if (!in_array($form->id, $enabled_forms)) continue;
+                                    $data = $saved_settings[$form->id] ?? [];
+                                    ?>
+                                    <tr data-form-id="<?php echo esc_attr($form->id); ?>">
+                                        <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
+                                        <td><textarea class="field-ids" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $data['field_ids'] ?? [])); ?></textarea></td>
+                                        <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
+                                        <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
+                                        <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
+                                        <td><a href="/test/<?php echo esc_attr($form->id); ?>" target="_blank">View</a></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <p>
+                            <button type="submit" class="button button-primary">Save Settings</button>
+                            <div id="fo-settings-msg" class="fo-msg"></div>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
         <?php
     }
 
