@@ -67,6 +67,8 @@ class Frm_optimizer_admin {
     }
 
     public function frm_display_optimizer_page() {
+
+        // Tab 1
         $total_entries = $this->get_total_entries();
         $archived_entries = $this->get_archived_entries();
         $forms = FrmForm::getAll();
@@ -77,18 +79,26 @@ class Frm_optimizer_admin {
                     ? implode(', ', array_map('esc_html', $statuses))
                     : 'None';
 
+        // Tab 2
         $enabled_forms_search = get_option('frm_optimizer_enabled_forms_search', []);
         $saved_settings_search = get_option('frm_optimizer_form_fields_search', []);
+
+        // Active tab logic
+        $active_tab = isset($_GET['tab']) && $_GET['tab'] == '2' ? 'search' : 'archiver';
         ?>
         <div class="wrap">
             <h1>Formidable Optimizer</h1>
 
             <h2 class="nav-tab-wrapper">
-                <a href="#archiver" class="nav-tab nav-tab-active" onclick="frmOptSwitchTab(event, 'archiver')">Archiver</a>
-                <a href="#search" class="nav-tab" onclick="frmOptSwitchTab(event, 'search')">Full Search</a>
+                <a href="#archiver" class="nav-tab <?php echo $active_tab === 'archiver' ? 'nav-tab-active' : ''; ?>" onclick="frmOptSwitchTab(event, 'archiver')">
+                    Archiver
+                </a>
+                <a href="#search" class="nav-tab <?php echo $active_tab === 'search' ? 'nav-tab-active' : ''; ?>" onclick="frmOptSwitchTab(event, 'search')">
+                    Full Search
+                </a>
             </h2>
 
-            <div id="archiver" class="fo-tab-content">
+            <div id="archiver" class="fo-tab-content" style="<?php echo $active_tab === 'archiver' ? '' : 'display:none;'; ?>">
                 <div class="fo-section">
                     <h2>Archive Entries</h2>
                     <p>
@@ -178,7 +188,7 @@ class Frm_optimizer_admin {
                 <?php endif; ?>
             </div>
 
-            <div id="search" class="fo-tab-content" style="display:none;">
+            <div id="search" class="fo-tab-content" style="<?php echo $active_tab === 'search' ? '' : 'display:none;'; ?>">
                 <div class="fo-section">
                     <h2>Search Tab – Enabled Forms</h2>
                     <form id="fo-enabled-forms-form-search">

@@ -21,13 +21,19 @@ jQuery(document).ready(function ($) {
         });
     }
 
+    function redirectWithTab(tab) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.location = url.toString();
+    }
+
     $('#fo-archive-btn').on('click', function (e) {
         e.preventDefault();
         const archivePeriod = $('#archive-period').val(); // Get the value of the archive-period input field
         runAjax('frm_archive_entries', '#fo-archive-btn', '#fo-archive-msg', archivePeriod);
 
         setTimeout(function () {
-            location.reload();
+            redirectWithTab('1');
         }, 1000);
     });
 
@@ -36,7 +42,7 @@ jQuery(document).ready(function ($) {
         runAjax('frm_restore_entries', '#fo-restore-btn', '#fo-restore-msg');
 
         setTimeout(function () {
-            location.reload();
+            redirectWithTab('1');
         }, 1000);
     });
 
@@ -58,7 +64,9 @@ jQuery(document).ready(function ($) {
             data: formData
         }, function (res) {
             $('#fo-settings-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
-            if (res.success) location.reload();
+
+            // Redirect to the same page with tab=1
+            redirectWithTab('1');
         });
     });
 
@@ -75,7 +83,9 @@ jQuery(document).ready(function ($) {
             forms: selectedForms
         }, function (res) {
             $('#fo-enabled-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
-            if (res.success) location.reload();
+
+            // Redirect to the same page with tab=1
+            redirectWithTab('1');
         });
     });
 
@@ -88,7 +98,9 @@ jQuery(document).ready(function ($) {
             statuses: statuses
         }, function (res) {
             $('#fo-statuses-msg').text(res.data.message).css('color', res.success ? 'green' : 'red');
-            if (res.success) location.reload();
+
+            // Redirect to the same page with tab=1
+            redirectWithTab('1');
         });
     });
 
@@ -102,7 +114,13 @@ jQuery(document).ready(function ($) {
             nonce: frm_optimizer.nonce,
             forms: selected
         }, function (response) {
-            $('#fo-enabled-msg-search').text(response.data.message).fadeIn().delay(2000).fadeOut();
+            // Optional success message
+            $('#fo-enabled-msg-search')
+                .text(response.data.message)
+                .fadeIn().delay(500).fadeOut();
+
+            // Redirect to same page with tab=2
+            redirectWithTab('2');
         });
     });
 
