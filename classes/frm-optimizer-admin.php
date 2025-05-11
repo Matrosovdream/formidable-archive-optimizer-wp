@@ -18,11 +18,17 @@ class Frm_optimizer_admin {
         add_action('admin_menu', array($this, 'frm_register_optimizer_page'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
 
+        // Tab 1
         add_action('wp_ajax_frm_archive_entries', array($this, 'ajax_archive_entries'));
         add_action('wp_ajax_frm_restore_entries', array($this, 'ajax_restore_entries'));
         add_action('wp_ajax_frm_save_form_field_settings', array($this, 'ajax_save_form_field_settings'));
         add_action('wp_ajax_frm_save_enabled_forms', array($this, 'ajax_save_enabled_forms'));
         add_action('wp_ajax_frm_save_statuses', array($this, 'ajax_save_statuses'));
+
+        // Tab 2
+        add_action('wp_ajax_frm_save_enabled_forms_search', array($this, 'ajax_save_enabled_forms_search'));
+        add_action('wp_ajax_frm_save_form_field_settings_search', array($this, 'ajax_save_form_field_settings_search'));
+
     }
 
     public function frm_register_optimizer_page() {
@@ -171,10 +177,65 @@ class Frm_optimizer_admin {
 
             <div id="search" class="fo-tab-content" style="display:none;">
                 <div class="fo-section">
-                    <h2>Full Search (Coming soon)</h2>
-                    <p>You can implement custom filters and search forms here.</p>
+                    <h2>Search Tab – Enabled Forms</h2>
+                    <form id="fo-enabled-forms-form-search">
+                        <p>Select which forms should be available in the search interface:</p>
+                        <select name="enabled_forms_search[]" multiple size="8" style="width: 100%;">
+                            <?php 
+                            $enabled_search_forms = get_option('frm_optimizer_enabled_forms_search', []);
+                            foreach ($forms as $form): ?>
+                                <option value="<?php echo $form->id; ?>" <?php selected(in_array($form->id, $enabled_search_forms)); ?>>
+                                    <?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p>
+                            <button type="submit" class="button button-primary">Save Enabled Forms</button>
+                            <div id="fo-enabled-msg-search" class="fo-msg"></div>
+                        </p>
+                    </form>
                 </div>
+
+                <?php if (!empty($enabled_search_forms)): ?>
+                <div class="fo-section" style="max-width: 100%;">
+                    <h2>Search Tab – Form Field Settings</h2>
+                    <form id="fo-form-settings-search">
+                        <table class="widefat fixed" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Form Name</th>
+                                    <th>Fields IDs</th>
+                                    <th>Status</th>
+                                    <th>Dot Number</th>
+                                    <th>Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $saved_search_settings = get_option('frm_optimizer_form_fields_search', []);
+                                foreach ($forms as $form):
+                                    if (!in_array($form->id, $enabled_search_forms)) continue;
+                                    $data = $saved_search_settings[$form->id] ?? [];
+                                    ?>
+                                    <tr data-form-id="<?php echo esc_attr($form->id); ?>">
+                                        <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
+                                        <td><textarea class="field-ids" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $data['field_ids'] ?? [])); ?></textarea></td>
+                                        <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
+                                        <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
+                                        <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <p>
+                            <button type="submit" class="button button-primary">Save Settings</button>
+                            <div id="fo-settings-msg-search" class="fo-msg"></div>
+                        </p>
+                    </form>
+                </div>
+                <?php endif; ?>
             </div>
+
         </div>
 
         <script>
@@ -265,6 +326,42 @@ class Frm_optimizer_admin {
         update_option('frm_optimizer_statuses', $statuses);
         wp_send_json_success(['message' => 'Statuses saved.']);
     }
+
+    public function ajax_save_enabled_forms_search() {
+        check_ajax_referer('frm_optimizer_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
+    
+        $form_ids = isset($_POST['forms']) ? array_map('intval', (array) $_POST['forms']) : [];
+        update_option('frm_optimizer_enabled_forms_search', $form_ids);
+        wp_send_json_success(['message' => 'Search tab: Enabled forms saved.']);
+    }
+    
+    public function ajax_save_form_field_settings_search() {
+        check_ajax_referer('frm_optimizer_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Permission denied']);
+        }
+    
+        $raw_data = $_POST['data'] ?? [];
+        $sanitized = [];
+    
+        foreach ($raw_data as $form_id => $data) {
+            $form_id = (int)$form_id;
+            $sanitized[$form_id] = [
+                'field_ids' => array_filter(array_map('sanitize_text_field', (array)($data['field_ids'] ?? []))),
+                'status' => sanitize_text_field($data['status'] ?? ''),
+                'dot' => sanitize_text_field($data['dot'] ?? ''),
+                'email' => sanitize_text_field($data['email'] ?? '')
+            ];
+        }
+    
+        update_option('frm_optimizer_form_fields_search', $sanitized);
+        wp_send_json_success(['message' => 'Search tab: Settings saved']);
+    }
+    
+
 }
 
 new Frm_optimizer_admin();

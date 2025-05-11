@@ -92,4 +92,44 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // Save Full Search Enabled Forms
+    $('#fo-enabled-forms-form-search').on('submit', function (e) {
+        e.preventDefault();
+        const selected = $(this).find('select').val();
+
+        $.post(frm_optimizer.ajax_url, {
+            action: 'frm_save_enabled_forms_search',
+            nonce: frm_optimizer.nonce,
+            forms: selected
+        }, function (response) {
+            $('#fo-enabled-msg-search').text(response.data.message).fadeIn().delay(2000).fadeOut();
+        });
+    });
+
+    // Save Full Search Form Field Settings
+    $('#fo-form-settings-search').on('submit', function (e) {
+        e.preventDefault();
+        const data = {};
+
+        $('#fo-form-settings-search tbody tr').each(function () {
+            const row = $(this);
+            const formId = row.data('form-id');
+            data[formId] = {
+                field_ids: row.find('.field-ids').val().split(',').map(i => i.trim()),
+                status: row.find('.field-status').val(),
+                dot: row.find('.field-dot').val(),
+                email: row.find('.field-email').val()
+            };
+        });
+
+        $.post(frm_optimizer.ajax_url, {
+            action: 'frm_save_form_field_settings_search',
+            nonce: frm_optimizer.nonce,
+            data: data
+        }, function (response) {
+            $('#fo-settings-msg-search').text(response.data.message).fadeIn().delay(2000).fadeOut();
+        });
+    });
+    
+
 });
