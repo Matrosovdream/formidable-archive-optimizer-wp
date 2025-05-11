@@ -134,9 +134,7 @@ jQuery(document).ready(function ($) {
             const formId = row.data('form-id');
             data[formId] = {
                 field_ids: row.find('.field-ids').val().split(',').map(i => i.trim()),
-                status: row.find('.field-status').val(),
-                dot: row.find('.field-dot').val(),
-                email: row.find('.field-email').val()
+                url: row.find('.field-url').val(),
             };
         });
 

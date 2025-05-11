@@ -190,7 +190,7 @@ class Frm_optimizer_admin {
 
             <div id="search" class="fo-tab-content" style="<?php echo $active_tab === 'search' ? '' : 'display:none;'; ?>">
                 <div class="fo-section">
-                    <h2>Search Tab – Enabled Forms</h2>
+                    <h2>Enabled Forms</h2>
                     <form id="fo-enabled-forms-form-search">
                         <p>Select which forms should be available in the search interface:</p>
                         <select name="enabled_forms_search[]" multiple size="8" style="width: 100%;">
@@ -211,16 +211,14 @@ class Frm_optimizer_admin {
 
                 <?php if (!empty($enabled_search_forms)): ?>
                     <div class="fo-section" style="max-width: 100%;">
-                        <h2>Search Tab – Form Field Settings</h2>
+                        <h2>Form Field Settings</h2>
                         <form id="fo-form-settings-search">
                             <table class="widefat fixed" style="width: 100%;">
                                 <thead>
                                     <tr>
                                         <th>Form Name</th>
                                         <th>Fields IDs</th>
-                                        <th>Status</th>
-                                        <th>Dot Number</th>
-                                        <th>Email</th>
+                                        <th>URL, add {form_id}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -233,9 +231,7 @@ class Frm_optimizer_admin {
                                         <tr data-form-id="<?php echo esc_attr($form->id); ?>">
                                             <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
                                             <td><textarea class="field-ids" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $data['field_ids'] ?? [])); ?></textarea></td>
-                                            <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
-                                            <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
-                                            <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
+                                            <td><input type="text" class="field-url" style="width: 100%;" value="<?php echo esc_attr($data['url'] ?? ''); ?>"></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -364,9 +360,11 @@ class Frm_optimizer_admin {
             $form_id = (int)$form_id;
             $sanitized[$form_id] = [
                 'field_ids' => array_filter(array_map('sanitize_text_field', (array)($data['field_ids'] ?? []))),
-                'status' => sanitize_text_field($data['status'] ?? ''),
+                'url' => sanitize_text_field($data['url'] ?? ''),
+                /*status' => sanitize_text_field($data['status'] ?? ''),
                 'dot' => sanitize_text_field($data['dot'] ?? ''),
                 'email' => sanitize_text_field($data['email'] ?? '')
+                */
             ];
         }
     
