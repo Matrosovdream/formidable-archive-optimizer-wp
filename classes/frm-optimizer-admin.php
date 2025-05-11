@@ -10,6 +10,7 @@ class Frm_optimizer_admin {
         $this->helper = new Frm_optimize_helper();
         $this->settings = new Frm_optimizer_settings();
         $this->optimizerArchive = new Frm_optimizer_archive();
+
         $this->addHooks();
     }
 
@@ -57,29 +58,6 @@ class Frm_optimizer_admin {
             'frm-optimizer-css',
             FRM_OPT_ASSETS . 'frm-optimizer.css?t=' . time()
         );
-
-        echo '<style>
-            .fo-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-            .fo-tab { padding: 8px 16px; border: 1px solid #ccc; cursor: pointer; }
-            .fo-tab.active { background: #0073aa; color: white; border-color: #0073aa; }
-            .fo-tab-content { display: none; }
-            .fo-tab-content.active { display: block; }
-        </style>';
-        echo '<script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const tabs = document.querySelectorAll(".fo-tab");
-                const contents = document.querySelectorAll(".fo-tab-content");
-                tabs.forEach((tab, idx) => {
-                    tab.addEventListener("click", () => {
-                        tabs.forEach(t => t.classList.remove("active"));
-                        contents.forEach(c => c.classList.remove("active"));
-                        tab.classList.add("active");
-                        contents[idx].classList.add("active");
-                    });
-                });
-                tabs[0].click();
-            });
-        </script>';
     }
 
     public function frm_display_optimizer_page() {
@@ -90,24 +68,25 @@ class Frm_optimizer_admin {
         $enabled_forms = get_option('frm_optimizer_enabled_forms', []);
         $statuses = get_option('frm_optimizer_statuses', []);
         $status_display = $statuses && is_array($statuses) && count($statuses) > 0
-            ? implode(', ', array_map('esc_html', $statuses))
-            : 'None';
+                    ? implode(', ', array_map('esc_html', $statuses))
+                    : 'None';
         ?>
         <div class="wrap">
             <h1>Formidable Optimizer</h1>
 
-            <div class="fo-tabs">
-                <div class="fo-tab active">Archiver Settings</div>
-                <div class="fo-tab">Full Search Settings</div>
-            </div>
+            <h2 class="nav-tab-wrapper">
+                <a href="#archiver" class="nav-tab nav-tab-active" onclick="frmOptSwitchTab(event, 'archiver')">Archiver</a>
+                <a href="#search" class="nav-tab" onclick="frmOptSwitchTab(event, 'search')">Full Search</a>
+            </h2>
 
-            <div class="fo-tab-content active">
+            <div id="archiver" class="fo-tab-content">
                 <div class="fo-section">
                     <h2>Archive Entries</h2>
                     <p>
                         Total Entries: <strong id="fo-total"><?php echo $total_entries; ?></strong>
                         (Statuses: <?php echo $status_display; ?>)
                     </p>
+
                     <p>Archive entries older than:
                         <input type="number" id="archive-period" value="<?php echo FRM_ARCHIVE_PERIOD; ?>" min="1" style="width: 60px;"> months
                     </p>
@@ -122,20 +101,6 @@ class Frm_optimizer_admin {
                     <div id="fo-restore-msg" class="fo-msg"></div>
                 </div>
 
-                <div class="fo-section">
-                    <h2>Statuses</h2>
-                    <form id="fo-statuses-form">
-                        <p>Enter comma-separated status values for archiving:</p>
-                        <textarea id="fo-statuses" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $statuses)); ?></textarea>
-                        <p>
-                            <button type="submit" class="button button-primary">Save Statuses</button>
-                            <div id="fo-statuses-msg" class="fo-msg"></div>
-                        </p>
-                    </form>
-                </div>
-            </div>
-
-            <div class="fo-tab-content">
                 <div class="fo-section">
                     <h2>Enabled Forms</h2>
                     <form id="fo-enabled-forms-form">
@@ -154,6 +119,19 @@ class Frm_optimizer_admin {
                     </form>
                 </div>
 
+                <div class="fo-section">
+                    <h2>Statuses</h2>
+                    <form id="fo-statuses-form">
+                        <p>Enter comma-separated status values for archiving:</p>
+                        <textarea id="fo-statuses" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $statuses)); ?></textarea>
+                        <p>
+                            <button type="submit" class="button button-primary">Save Statuses</button>
+                            <div id="fo-statuses-msg" class="fo-msg"></div>
+                        </p>
+                    </form>
+                </div>
+
+                <?php if (!empty($enabled_forms)): ?>
                 <div class="fo-section" style="max-width: 100%;">
                     <h2>Form Field Settings</h2>
                     <form id="fo-form-settings">
@@ -165,7 +143,6 @@ class Frm_optimizer_admin {
                                     <th>Status</th>
                                     <th>Dot Number</th>
                                     <th>Email</th>
-                                    <th>View</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -179,7 +156,6 @@ class Frm_optimizer_admin {
                                         <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
                                         <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
                                         <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
-                                        <td><a href="/test/<?php echo esc_attr($form->id); ?>" target="_blank">View</a></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -190,8 +166,27 @@ class Frm_optimizer_admin {
                         </p>
                     </form>
                 </div>
+                <?php endif; ?>
+            </div>
+
+            <div id="search" class="fo-tab-content" style="display:none;">
+                <div class="fo-section">
+                    <h2>Full Search (Coming soon)</h2>
+                    <p>You can implement custom filters and search forms here.</p>
+                </div>
             </div>
         </div>
+
+        <script>
+            function frmOptSwitchTab(event, tabId) {
+                event.preventDefault();
+                document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('nav-tab-active'));
+                document.querySelectorAll('.fo-tab-content').forEach(content => content.style.display = 'none');
+
+                document.querySelector('[href="#' + tabId + '"]').classList.add('nav-tab-active');
+                document.getElementById(tabId).style.display = 'block';
+            }
+        </script>
         <?php
     }
 
