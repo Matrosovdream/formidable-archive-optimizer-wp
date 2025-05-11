@@ -76,6 +76,9 @@ class Frm_optimizer_admin {
         $status_display = $statuses && is_array($statuses) && count($statuses) > 0
                     ? implode(', ', array_map('esc_html', $statuses))
                     : 'None';
+
+        $enabled_forms_search = get_option('frm_optimizer_enabled_forms_search', []);
+        $saved_settings_search = get_option('frm_optimizer_form_fields_search', []);
         ?>
         <div class="wrap">
             <h1>Formidable Optimizer</h1>
@@ -197,42 +200,42 @@ class Frm_optimizer_admin {
                 </div>
 
                 <?php if (!empty($enabled_search_forms)): ?>
-                <div class="fo-section" style="max-width: 100%;">
-                    <h2>Search Tab – Form Field Settings</h2>
-                    <form id="fo-form-settings-search">
-                        <table class="widefat fixed" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th>Form Name</th>
-                                    <th>Fields IDs</th>
-                                    <th>Status</th>
-                                    <th>Dot Number</th>
-                                    <th>Email</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $saved_search_settings = get_option('frm_optimizer_form_fields_search', []);
-                                foreach ($forms as $form):
-                                    if (!in_array($form->id, $enabled_search_forms)) continue;
-                                    $data = $saved_search_settings[$form->id] ?? [];
-                                    ?>
-                                    <tr data-form-id="<?php echo esc_attr($form->id); ?>">
-                                        <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
-                                        <td><textarea class="field-ids" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $data['field_ids'] ?? [])); ?></textarea></td>
-                                        <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
-                                        <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
-                                        <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
+                    <div class="fo-section" style="max-width: 100%;">
+                        <h2>Search Tab – Form Field Settings</h2>
+                        <form id="fo-form-settings-search">
+                            <table class="widefat fixed" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Form Name</th>
+                                        <th>Fields IDs</th>
+                                        <th>Status</th>
+                                        <th>Dot Number</th>
+                                        <th>Email</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <p>
-                            <button type="submit" class="button button-primary">Save Settings</button>
-                            <div id="fo-settings-msg-search" class="fo-msg"></div>
-                        </p>
-                    </form>
-                </div>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $saved_search_settings = get_option('frm_optimizer_form_fields_search', []);
+                                    foreach ($forms as $form):
+                                        if (!in_array($form->id, $enabled_search_forms)) continue;
+                                        $data = $saved_search_settings[$form->id] ?? [];
+                                        ?>
+                                        <tr data-form-id="<?php echo esc_attr($form->id); ?>">
+                                            <td><?php echo esc_html($form->name); ?> (ID: <?php echo $form->id; ?>)</td>
+                                            <td><textarea class="field-ids" rows="3" style="width: 100%;"><?php echo esc_textarea(implode(',', $data['field_ids'] ?? [])); ?></textarea></td>
+                                            <td><input type="number" class="field-status" style="width: 100%;" value="<?php echo esc_attr($data['status'] ?? ''); ?>"></td>
+                                            <td><input type="number" class="field-dot" style="width: 100%;" value="<?php echo esc_attr($data['dot'] ?? ''); ?>"></td>
+                                            <td><input type="number" class="field-email" style="width: 100%;" value="<?php echo esc_attr($data['email'] ?? ''); ?>"></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                            <p>
+                                <button type="submit" class="button button-primary">Save Settings</button>
+                                <div id="fo-settings-msg-search" class="fo-msg"></div>
+                            </p>
+                        </form>
+                    </div>
                 <?php endif; ?>
             </div>
 
