@@ -112,10 +112,22 @@ class Frm_optimize_helper
 
         // Get details for entries
         foreach ($entries as $key => $entry) {
-            $entries[$key] = FrmEntry::getOne($entry['id'], true);
+
+            //$entry = FrmEntry::getOne($entry['id'], true);
+
+            $metas = $this->getDefaultEntryMeta($entry['id']);
+            $entry->metas = $metas;
+
+            $entry = (new Frm_entry_replacer())->processEntryMeta($metas, $entry);
+
+            print_r($entry); die();
+            
+
+            $entries[$key] = $entry;
 
             // Add extra params
             $entries[$key]->url = $this->getEntryAdminUrl($entry['id']);
+
         }
 
         return [
@@ -124,6 +136,19 @@ class Frm_optimize_helper
             'total_pages' => ceil($total / $per_page),
             'current_page' => $offset / $per_page + 1
         ];
+
+    }
+
+    public function getDefaultEntryMeta($entry_id)
+    {
+        global $wpdb;
+
+        $metas = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$this->tables['frm_item_metas_default']} WHERE item_id = %d",
+            $entry_id
+        ));
+
+        return $metas;
 
     }
 

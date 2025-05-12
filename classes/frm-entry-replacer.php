@@ -62,7 +62,7 @@ class Frm_entry_replacer
 
     }
 
-    private function setEntryMeta( $entry )
+    public function setEntryMeta( $entry )
     {
 
         global $wpdb;
@@ -80,7 +80,7 @@ class Frm_entry_replacer
 
     }
 
-    private function processEntryMeta( $metas, $entry ) {
+    public function processEntryMeta( $metas, $entry ) {
 
         $field_ids = [];
         
