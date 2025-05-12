@@ -54,6 +54,18 @@ class Frm_optimize_helper
         } elseif (!empty($filters['form_id'])) {
             $where .= " AND i.form_id = %d";
             $params[] = (int) $filters['form_id'];
+        } else {
+            // Get enabled forms
+            $enabled_forms = $this->getDefaultForms();
+            $enabled_forms_ids = array_map(function ($form) {
+                return $form['id'];
+            }, $enabled_forms);
+
+            if (!empty($enabled_forms)) {
+                $where .= " AND i.form_id IN (" . implode(',', array_map('intval', $enabled_forms_ids)) . ")";
+            } else {
+                $where .= " AND i.form_id IN (0)"; // No forms enabled, so no entries to show
+            }
         }
 
          // Filter by order number
@@ -226,6 +238,14 @@ class Frm_optimize_helper
         $forms = array_filter($forms, function ($form) {
             return !empty($form['name']);
         });
+
+        // Filter by get_option frm_optimizer_enabled_forms_search
+        $enabled_forms = get_option('frm_optimizer_enabled_forms_search', []);
+        if (!empty($enabled_forms)) {
+            $forms = array_filter($forms, function ($form) use ($enabled_forms) {
+                return in_array($form['id'], $enabled_forms);
+            });
+        }
 
         // Sort by name
         usort($forms, function ($a, $b) {

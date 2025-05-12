@@ -29,6 +29,13 @@ add_shortcode('frm_entry_list', function () {
     // Get forms
     $forms = $helper->getDefaultForms();
 
+    /*
+    echo "<pre>";
+    print_r($entries);
+    echo "</pre>";
+    die();
+    */
+
     ob_start();
     ?>
 
