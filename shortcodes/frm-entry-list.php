@@ -87,6 +87,7 @@ add_shortcode('frm_entry_list', function () {
                             <th class="px-4 py-2" style="width: 5%;"><input type="checkbox" id="select-all"></th>
                             <th class="px-4 py-2 text-left" style="width: 10%;">Order #</th>
                             <th class="px-4 py-2 text-left" style="width: 15%;">Form</th>
+                            <th class="">Fields</th>
                             <th class="px-4 py-2 text-left" style="width: 15%;">Created at</th>
                             <th class="px-4 py-2 text-left">Link</th>
                         </tr>
@@ -99,6 +100,12 @@ add_shortcode('frm_entry_list', function () {
                                 </td>
                                 <td class="px-4 py-2"><?php echo esc_html($entry->id ?: '-'); ?></td>
                                 <td class="px-4 py-2"><?php echo $entry->form_name ?? ''; ?></td>
+                                <td class="px-4 py-2">
+                                    <?php foreach ($entry->fields as $field): ?>
+                                        <b><?php echo esc_html($field->name); ?>:</b>
+                                        <?php echo esc_html(is_array($field->value) ? implode(', ', $field->value) : $field->value); ?><br>
+                                    <?php endforeach; ?>
+                                </td>
                                 <td class="px-4 py-2">
                                     <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
                                 </td>
