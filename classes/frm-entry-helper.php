@@ -119,7 +119,10 @@ class Frm_optimize_helper
             $entry->url = $this->prepareEntryUrl($entry);
 
             // Prepare entry meta
-            $entry->field = $this->prepareEntryFields($entry);
+            $entry->fields = $this->prepareEntryFields(
+                $entry,
+                [843, 41]
+            );
             
             $entries[$key] = $entry;
 
@@ -131,6 +134,7 @@ class Frm_optimize_helper
         echo "</pre>";
         die();
         */
+        
 
         return [
             'entries' => $entries,
@@ -154,7 +158,7 @@ class Frm_optimize_helper
 
     }
 
-    public function prepareEntryFields($entry) {
+    public function prepareEntryFields($entry, $field_ids=[]) {
 
         $metas = $entry->metas ?? [];
         $meta_ids = [];
@@ -165,7 +169,7 @@ class Frm_optimize_helper
         }
 
         // Extract fields info
-        $fields = $this->getFrmFields( ['field_id' => $meta_ids ] );
+        $fields = $this->getFrmFields( ['field_id' => ( !empty($field_ids)) ? $field_ids : $meta_ids ] );
 
         // Prepare fields
         foreach( $fields as $key=>$field ) {
