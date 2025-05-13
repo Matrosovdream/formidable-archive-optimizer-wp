@@ -121,20 +121,12 @@ class Frm_optimize_helper
             // Prepare entry meta
             $entry->fields = $this->prepareEntryFields(
                 $entry,
-                [843, 41]
+                $this->getDefaultFieldListForm( $entry->form_id ),
             );
             
             $entries[$key] = $entry;
 
         }
-
-        /*
-        echo "<pre>";
-        print_r($entries);
-        echo "</pre>";
-        die();
-        */
-        
 
         return [
             'entries' => $entries,
@@ -142,6 +134,12 @@ class Frm_optimize_helper
             'total_pages' => ceil($total / $per_page),
             'current_page' => $offset / $per_page + 1
         ];
+
+    }
+
+    public function getDefaultFieldListForm( $form_id ) {
+        
+        return get_option('frm_optimizer_form_fields_search')[ $form_id ]['field_ids'] ?? [];
 
     }
 
