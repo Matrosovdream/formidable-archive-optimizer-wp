@@ -92,7 +92,7 @@ add_shortcode('frm_entry_archived_list', function () {
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="px-4 py-2"><input type="checkbox" id="select-all"></th>
+                            <th class="px-4 py-2" style="width: 5%;"><input type="checkbox" id="select-all"></th>
                             <th class="px-4 py-2 text-left" style="width: 10%;">Order #</th>
                             <th class="px-4 py-2 text-left" style="width: 15%;">Form</th>
                             <th class="px-4 py-2 text-left">Fields</th>
