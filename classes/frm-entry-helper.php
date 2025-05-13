@@ -115,16 +115,11 @@ class Frm_optimize_helper
 
             $entry = FrmEntry::getOne($entry['id'], true);
 
-            //$metas = $this->getDefaultEntryMeta($entry['id']);
-
-            /*
-            $entry->metas = $metas;
-            $entry = (new Frm_entry_replacer())->processEntryMeta($metas, $entry);
-            print_r($entry); die();
-            */
-
             // Add extra params
             $entry->url = $this->prepareEntryUrl($entry);
+
+            // Prepare entry meta
+            $entry->field = $this->prepareEntryFields($entry);
             
             $entries[$key] = $entry;
 
@@ -159,6 +154,28 @@ class Frm_optimize_helper
 
     }
 
+    public function prepareEntryFields($entry) {
+
+        $metas = $entry->metas ?? [];
+        $meta_ids = [];
+        
+        // Extract ids
+        foreach ($metas as $id=>$value) {
+            $meta_ids[] = $id;
+        }
+
+        // Extract fields info
+        $fields = $this->getFrmFields( ['field_id' => $meta_ids ] );
+
+
+        echo "<pre>";
+        print_r($fields);
+        echo "</pre>";
+        die();
+
+
+    }
+
     public function prepareEntryUrl(object $entry)
     {
 
@@ -187,6 +204,40 @@ class Frm_optimize_helper
             'id' => $entry_id
         ], admin_url('admin.php'));
         */
+
+    }
+
+    public function getFrmFields( array $filter = [] ) {
+
+        global $wpdb;
+
+        $sql = "SELECT id, name, type FROM {$wpdb->prefix}frm_fields";
+
+        /* Filters start */
+        $params = [];
+
+        // By field_id
+        if( !empty($filter['field_id']) ) {
+            $params[] = "id IN (".implode(',', $filter['field_id']).")";
+        } 
+
+        /* Filters end */
+
+        // Prepare WHERE tail
+        if( !empty($params) ) {
+            $sql .= " WHERE ".implode(" AND ", $params);
+        }
+
+        // Make query
+        $fieldsRaw = $wpdb->get_results( $sql, ARRAY_A );
+
+        // Process response
+        $fields = [];
+        foreach ($fieldsRaw as $field) {
+            $fields[$field['id']] = $field;
+        }
+
+        return $fields;
 
     }
 
