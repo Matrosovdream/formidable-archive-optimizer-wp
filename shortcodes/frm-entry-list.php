@@ -109,8 +109,8 @@ add_shortcode('frm_entry_list', function () {
                                 <td class="px-4 py-2"><?php echo $entry->form_name ?? ''; ?></td>
                                 <td class="px-4 py-2">
                                     <?php foreach ($entry->fields as $field): ?>
-                                        <b><?php echo esc_html($field->name); ?>:</b>
-                                        <?php echo esc_html(is_array($field->value) ? implode(', ', $field->value) : $field->value); ?><br>
+                                        <b><?php echo esc_html($field['name']); ?>:</b>
+                                        <?php echo esc_html(is_array($field['value']) ? implode(', ', $field['value']) : $field['value']); ?><br>
                                     <?php endforeach; ?>
                                 </td>
                                 <td class="px-4 py-2">
