@@ -27,7 +27,7 @@ add_shortcode('frm_entry_list', function () {
     $current_page = $result['current_page'] ?? 1;
 
     // Get forms
-    $forms = $helper->getDefaultForms();
+    $forms = $helper->getDefaultForms( true );
 
     /*
     echo "<pre>";

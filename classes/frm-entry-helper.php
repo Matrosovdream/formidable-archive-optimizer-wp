@@ -56,7 +56,7 @@ class Frm_optimize_helper
             $params[] = (int) $filters['form_id'];
         } else {
             // Get enabled forms
-            $enabled_forms = $this->getDefaultForms();
+            $enabled_forms = $this->getDefaultForms( true );
             $enabled_forms_ids = array_map(function ($form) {
                 return $form['id'];
             }, $enabled_forms);
@@ -113,20 +113,21 @@ class Frm_optimize_helper
         // Get details for entries
         foreach ($entries as $key => $entry) {
 
-            //$entry = FrmEntry::getOne($entry['id'], true);
+            $entry = FrmEntry::getOne($entry['id'], true);
 
-            $metas = $this->getDefaultEntryMeta($entry['id']);
+            //$metas = $this->getDefaultEntryMeta($entry['id']);
+
+            /*
             $entry->metas = $metas;
-
             $entry = (new Frm_entry_replacer())->processEntryMeta($metas, $entry);
-
             print_r($entry); die();
+            */
             
 
             $entries[$key] = $entry;
 
             // Add extra params
-            $entries[$key]->url = $this->getEntryAdminUrl($entry['id']);
+            //$entries[$key]->url = $this->getEntryAdminUrl($entry['id']);
 
         }
 
@@ -247,7 +248,7 @@ class Frm_optimize_helper
 
     }
 
-    public function getDefaultForms()
+    public function getDefaultForms( $filter_by_options = false )
     {
         $forms = FrmForm::getAll();
 
@@ -265,11 +266,13 @@ class Frm_optimize_helper
         });
 
         // Filter by get_option frm_optimizer_enabled_forms_search
-        $enabled_forms = get_option('frm_optimizer_enabled_forms_search', []);
-        if (!empty($enabled_forms)) {
-            $forms = array_filter($forms, function ($form) use ($enabled_forms) {
-                return in_array($form['id'], $enabled_forms);
-            });
+        if ($filter_by_options) {
+            $enabled_forms = get_option('frm_optimizer_enabled_forms_search', []);
+            if (!empty($enabled_forms)) {
+                $forms = array_filter($forms, function ($form) use ($enabled_forms) {
+                    return in_array($form['id'], $enabled_forms);
+                });
+            }
         }
 
         // Sort by name
