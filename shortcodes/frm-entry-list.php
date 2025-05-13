@@ -117,9 +117,11 @@ add_shortcode('frm_entry_list', function () {
                                     <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
                                 </td>
                                 <td class="px-4 py-2">
-                                    <a href="<?php echo esc_url($entry->url); ?>" class="text-blue-600 hover:underline">
-                                        View Entry
-                                    </a>
+                                    <?php if( $entry->url != '' ) { ?>
+                                        <a href="<?php echo esc_url($entry->url); ?>" class="text-blue-600 hover:underline">
+                                            View Entry
+                                        </a>
+                                    <?php } ?>
                                 </td>
                             </tr>
                         <?php endforeach; else: ?>

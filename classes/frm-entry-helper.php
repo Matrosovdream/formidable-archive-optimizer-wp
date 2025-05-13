@@ -122,14 +122,20 @@ class Frm_optimize_helper
             $entry = (new Frm_entry_replacer())->processEntryMeta($metas, $entry);
             print_r($entry); die();
             */
-            
-
-            $entries[$key] = $entry;
 
             // Add extra params
-            //$entries[$key]->url = $this->getEntryAdminUrl($entry['id']);
+            $entry->url = $this->prepareEntryUrl($entry);
+            
+            $entries[$key] = $entry;
 
         }
+
+        /*
+        echo "<pre>";
+        print_r($entries);
+        echo "</pre>";
+        die();
+        */
 
         return [
             'entries' => $entries,
@@ -153,13 +159,34 @@ class Frm_optimize_helper
 
     }
 
-    public function getEntryAdminUrl($entry_id)
+    public function prepareEntryUrl(object $entry)
     {
+
+        // Let's take from option
+        $settings = get_option('frm_optimizer_form_fields_search');
+
+        // Replace variables
+        $variables = [
+            'form_id' => $entry->id,
+        ];
+
+        // Retrieve Url
+        $url = $settings[ $entry->form_id ]['url'] ?? '';
+
+        // Make replacement
+        foreach ($variables as $key => $value) {
+            $url = str_replace('{'. $key .'}', $value, $url);
+        }
+
+        return $url;
+
+        /*
         return add_query_arg([
             'page' => 'formidable-entries',
             'frm_action' => 'show',
             'id' => $entry_id
         ], admin_url('admin.php'));
+        */
 
     }
 
