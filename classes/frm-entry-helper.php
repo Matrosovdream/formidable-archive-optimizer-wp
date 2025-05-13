@@ -118,11 +118,18 @@ class Frm_optimize_helper
             // Add extra params
             $entry->url = $this->prepareEntryUrl($entry);
 
+            // List of default form fields
+            $field_ids = $this->getDefaultFieldListForm( $entry->form_id );
+
             // Prepare entry meta
-            $entry->fields = $this->prepareEntryFields(
-                $entry,
-                $this->getDefaultFieldListForm( $entry->form_id ),
-            );
+            if( !empty($field_ids) ) {
+                $entry->fields = $this->prepareEntryFields(
+                    $entry,
+                    $field_ids,
+                );
+            } else {
+                $entry->fields = [];
+            }
             
             $entries[$key] = $entry;
 
