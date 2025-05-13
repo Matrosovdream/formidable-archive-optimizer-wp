@@ -91,32 +91,32 @@ add_shortcode('frm_entry_list', function () {
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="px-4 py-2" style="width: 5%;"><input type="checkbox" id="select-all"></th>
-                            <th class="px-4 py-2 text-left" style="width: 10%;">Order #</th>
-                            <th class="px-4 py-2 text-left" style="width: 15%;">Form</th>
-                            <th class="">Fields</th>
-                            <th class="px-4 py-2 text-left" style="width: 15%;">Created at</th>
-                            <th class="px-4 py-2 text-left">Link</th>
+                            <th class="py-2" style="width: 5%;"><input type="checkbox" id="select-all"></th>
+                            <th class="py-2 text-left" style="width: 10%;">Order #</th>
+                            <th class="py-2 text-left" style="width: 15%;">Form</th>
+                            <th class="text-left">Fields</th>
+                            <th class="py-2 text-left" style="width: 15%;">Created at</th>
+                            <th class="py-2 text-left">Link</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <?php if ($entries): foreach ($entries as $entry): ?>
                             <tr>
-                                <td class="px-4 py-2 text-center">
+                                <td class="py-2 text-center">
                                     <input type="checkbox" name="selected_ids[]" value="<?php echo esc_attr($entry->id); ?>">
                                 </td>
-                                <td class="px-4 py-2"><?php echo esc_html($entry->id ?: '-'); ?></td>
-                                <td class="px-4 py-2"><?php echo $entry->form_name ?? ''; ?></td>
-                                <td class="px-4 py-2">
+                                <td class="py-2"><?php echo esc_html($entry->id ?: '-'); ?></td>
+                                <td class="py-2"><?php echo $entry->form_name ?? ''; ?></td>
+                                <td class="py-2">
                                     <?php foreach ($entry->fields as $field): ?>
                                         <b><?php echo esc_html($field['name']); ?>:</b>
                                         <?php echo esc_html(is_array($field['value']) ? implode(', ', $field['value']) : $field['value']); ?><br>
                                     <?php endforeach; ?>
                                 </td>
-                                <td class="px-4 py-2">
+                                <td class="py-2">
                                     <?php echo esc_html(date('Y-m-d', strtotime($entry->created_at))); ?>
                                 </td>
-                                <td class="px-4 py-2">
+                                <td class="py-2">
                                     <?php if( $entry->url != '' ) { ?>
                                         <a href="<?php echo esc_url($entry->url); ?>" class="text-blue-600 hover:underline">
                                             View Entry
