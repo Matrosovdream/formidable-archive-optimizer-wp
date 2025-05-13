@@ -167,12 +167,12 @@ class Frm_optimize_helper
         // Extract fields info
         $fields = $this->getFrmFields( ['field_id' => $meta_ids ] );
 
+        // Prepare fields
+        foreach( $fields as $key=>$field ) {
+            $fields[$key]['value'] = $metas[$key];
+        }
 
-        echo "<pre>";
-        print_r($fields);
-        echo "</pre>";
-        die();
-
+        return $fields;
 
     }
 
