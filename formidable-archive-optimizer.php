@@ -21,6 +21,7 @@ require_once FRM_OPT_URL . '/classes/frm-optimizer-admin.php';
 // Shortcodes
 require_once FRM_OPT_URL . '/shortcodes/frm-entry-archived-list.php';
 require_once FRM_OPT_URL . '/shortcodes/frm-entry-list.php';
+require_once FRM_OPT_URL . '/shortcodes/frm-entry-search-bar.php';
 
 
 
